@@ -1,0 +1,106 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-mark">SF</div>
+            <span>SkillForge</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a class="nav-item" (click)="navigate('/dashboard/instructor')"><span>🏠</span> Overview</a>
+            <a class="nav-item active"><span>📚</span> My Courses</a>
+            <a class="nav-item" (click)="navigate('/quiz-generator')"><span>🤖</span> AI Quiz Generator</a>
+            <a class="nav-item" (click)="navigate('/students')"><span>👥</span> Students</a>
+            <a class="nav-item" (click)="navigate('/analytics')"><span>📊</span> Analytics</a>
+        </nav>
+        <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <h1>My Courses</h1>
+                <p>Manage your course content and quizzes</p>
+            </div>
+            <button class="btn-primary" (click)="createCourse()">+ New Course</button>
+        </header>
+
+        @if (toastMessage()) {
+        <div class="toast">✓ {{ toastMessage() }}</div>
+        }
+
+        @if (errorMessage()) {
+        <div class="alert-error">⚠ {{ errorMessage() }}</div>
+        }
+
+        @if (isLoading()) {
+        <div class="loading-state">
+            <div class="spinner-lg"></div>
+            <p>Loading courses...</p>
+        </div>
+        }
+
+        @if (!isLoading() && courses().length === 0) {
+        <div class="empty-state">
+            <div class="empty-icon">📚</div>
+            <h3>No courses yet</h3>
+            <p>Create your first course and start teaching!</p>
+            <button class="btn-primary" (click)="createCourse()">+ Create Course</button>
+        </div>
+        }
+
+        @if (!isLoading() && courses().length > 0) {
+        <div class="course-grid">
+            @for (course of courses(); track course.id) {
+            <div class="course-card">
+                <div class="card-header">
+                    <div class="course-icon">📘</div>
+                    <div class="card-badges">
+                <span class="difficulty-badge" [class]="getDifficultyClass(course.difficulty_level)">
+                  {{ course.difficulty_level }}
+                </span>
+                        <span class="status-badge"
+                              [class.published]="course.status === 'PUBLISHED'"
+                              [class.draft]="course.status === 'DRAFT'">
+                  {{ course.status }}
+                </span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <h3 class="course-title">{{ course.title }}</h3>
+                    <p class="course-desc">{{ course.description || 'No description provided.' }}</p>
+                </div>
+
+                <div class="card-meta">
+                    <span class="meta-item">🗓 {{ course.createdAt | date: 'MMM d, y' }}</span>
+                </div>
+
+                <div class="card-actions">
+                    <button class="btn-action content" (click)="navigate('/courses/' + course.id + '/content')">📁 Content</button>
+                    <button class="btn-action edit" (click)="editCourse(course.id)">✏️ Edit</button>
+                    <button class="btn-action"
+                            [class.publish]="course.status === 'DRAFT'"
+                            [class.unpublish]="course.status === 'PUBLISHED'"
+                            (click)="toggleStatus(course)">
+                        {{ course.status === 'PUBLISHED' ? '📤 Unpublish' : '🚀 Publish' }}
+                    </button>
+                    <button class="btn-action delete" (click)="confirmDelete(course)">
+                        🗑 Delete
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </main>
+</div>
+
+<!-- Confirm Dialog -->
+<app-confirm-dialog
+        [visible]="showDialog()"
+        [title]="dialogTitle()"
+        [message]="dialogMessage()"
+        [confirmLabel]="dialogConfirmLabel()"
+        [type]="dialogType()"
+        (confirmed)="onDialogConfirmed()"
+        (cancelled)="onDialogCancelled()"
+/>

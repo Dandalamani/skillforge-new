@@ -1,0 +1,92 @@
+<div class="auth-wrapper">
+  <div class="auth-left">
+    <div class="brand">
+      <div class="logo-mark">SF</div>
+      <span class="brand-name">SkillForge</span>
+    </div>
+    <div class="hero-text">
+      <h1>Forge your<br /><em>future.</em></h1>
+      <p>AI-powered adaptive learning that grows with you.</p>
+    </div>
+    <div class="decorative-grid"></div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="card-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to continue your learning journey</p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error">
+          <span class="alert-icon">⚠</span>
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            [class.invalid]="email.invalid && email.touched"
+            autocomplete="email"
+          />
+          @if (email.invalid && email.touched) {
+            <span class="field-error">
+              {{ email.errors?.['required'] ? 'Email is required' : 'Enter a valid email' }}
+            </span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">
+            Password
+            <a routerLink="/auth/forgot" class="forgot-link">Forgot password?</a>
+          </label>
+          <div class="input-group">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              [class.invalid]="password.invalid && password.touched"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-pw"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            >
+              {{ showPassword() ? '🙈' : '👁' }}
+            </button>
+          </div>
+          @if (password.invalid && password.touched) {
+            <span class="field-error">
+              {{ password.errors?.['required'] ? 'Password is required' : 'Minimum 6 characters' }}
+            </span>
+          }
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="spinner"></span>
+            Signing in…
+          } @else {
+            Sign in
+          }
+        </button>
+      </form>
+
+      <p class="switch-auth">
+        New to SkillForge?
+        <a routerLink="/auth/register">Create an account</a>
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+@if (visible) {
+<div class="dialog-backdrop" (click)="onBackdropClick($event)">
+    <div class="dialog-box" [class]="type" role="dialog" aria-modal="true">
+
+        <!-- Icon -->
+        <div class="dialog-icon">
+            @if (type === 'danger') { <span>🗑️</span> }
+            @if (type === 'warning') { <span>⚠️</span> }
+            @if (type === 'info') { <span>ℹ️</span> }
+        </div>
+
+        <!-- Content -->
+        <div class="dialog-content">
+            <h3 class="dialog-title">{{ title }}</h3>
+            <p class="dialog-message">{{ message }}</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="dialog-actions">
+            <button class="btn-cancel" (click)="onCancel()">
+                {{ cancelLabel }}
+            </button>
+            <button class="btn-confirm" [class]="type" (click)="onConfirm()">
+                {{ confirmLabel }}
+            </button>
+        </div>
+
+    </div>
+</div>
+}

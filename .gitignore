@@ -1,0 +1,15 @@
+# Backend
+skillforge-backend/node_modules/
+skillforge-backend/.env
+skillforge-backend/dist/
+skillforge-backend/*.log
+skillforge-backend/uploads/
+
+# Frontend
+skillforge/node_modules/
+skillforge/.angular/
+skillforge/dist/
+
+# General
+*.log
+.DS_Store

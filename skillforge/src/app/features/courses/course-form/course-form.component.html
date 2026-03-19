@@ -1,0 +1,104 @@
+<div class="form-page">
+    <div class="form-container">
+
+        <!-- Header -->
+        <div class="form-header">
+            <a routerLink="/courses" class="back-link">← Back to Courses</a>
+            <h1>{{ isEditMode() ? 'Edit Course' : 'Create New Course' }}</h1>
+            <p>{{ isEditMode() ? 'Update your course details below.' : 'Fill in the details to create your course.' }}</p>
+        </div>
+
+        <!-- Loading skeleton for edit mode -->
+        @if (isFetching()) {
+        <div class="skeleton-form">
+            <div class="skeleton-line tall"></div>
+            <div class="skeleton-line xtall"></div>
+            <div class="skeleton-line short"></div>
+        </div>
+        }
+
+        @if (!isFetching()) {
+        @if (errorMessage()) {
+        <div class="alert-error">⚠ {{ errorMessage() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+            <!-- Title -->
+            <div class="field">
+                <label for="title">Course Title <span class="required">*</span></label>
+                <input
+                        id="title"
+                        type="text"
+                        formControlName="title"
+                        placeholder="e.g. Machine Learning Fundamentals"
+                        [class.invalid]="title.invalid && title.touched"
+                />
+                <div class="field-hint">
+            <span class="field-error" *ngIf="title.invalid && title.touched">
+              {{ title.errors?.['required'] ? 'Title is required' : 'Must be 3–100 characters' }}
+            </span>
+                    <span class="char-count" [class.over]="(title.value?.length ?? 0) > 90">
+              {{ title.value?.length ?? 0 }}/100
+            </span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="field">
+                <label for="description">Description <span class="required">*</span></label>
+                <textarea
+                        id="description"
+                        formControlName="description"
+                        rows="5"
+                        placeholder="Describe what students will learn in this course..."
+                        [class.invalid]="description.invalid && description.touched"
+                ></textarea>
+                <div class="field-hint">
+            <span class="field-error" *ngIf="description.invalid && description.touched">
+              {{ description.errors?.['required'] ? 'Description is required' : 'Must be 10–1000 characters' }}
+            </span>
+                    <span class="char-count" [class.over]="(description.value?.length ?? 0) > 950">
+              {{ description.value?.length ?? 0 }}/1000
+            </span>
+                </div>
+            </div>
+
+            <!-- Difficulty Level -->
+            <div class="field">
+                <label>Difficulty Level <span class="required">*</span></label>
+                <div class="difficulty-selector">
+                    @for (level of difficulties; track level) {
+                    <label
+                            class="difficulty-option"
+                            [class.selected]="form.value.difficulty_level === level"
+                            [class]="'difficulty-option ' + level.toLowerCase() + (form.value.difficulty_level === level ? ' selected' : '')"
+                    >
+                        <input type="radio" formControlName="difficulty_level" [value]="level" />
+                        <span class="diff-icon">
+                  {{ level === 'BEGINNER' ? '🌱' : level === 'INTERMEDIATE' ? '🔥' : '⚡' }}
+                </span>
+                        <span class="diff-label">{{ level }}</span>
+                    </label>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="isLoading()">
+                    @if (isLoading()) {
+                    <span class="spinner"></span>
+                    {{ isEditMode() ? 'Saving...' : 'Creating...' }}
+                    } @else {
+                    {{ isEditMode() ? '💾 Save Changes' : '🚀 Create Course' }}
+                    }
+                </button>
+            </div>
+
+        </form>
+        }
+
+    </div>
+</div>

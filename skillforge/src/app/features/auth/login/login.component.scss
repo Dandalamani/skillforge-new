@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:host {
+  display: block;
+  height: 100vh;
+  font-family: 'DM Sans', sans-serif;
+}
+
+// ─── Layout ──────────────────────────────────────────────────────────────────
+.auth-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Left Panel ──────────────────────────────────────────────────────────────
+.auth-left {
+  background: #0d0d0d;
+  color: #fff;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 1;
+}
+
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  background: #f5c842;
+  color: #0d0d0d;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.hero-text {
+  margin-top: auto;
+  margin-bottom: 4rem;
+  z-index: 1;
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    line-height: 1.05;
+    margin: 0 0 1.5rem;
+    letter-spacing: -0.03em;
+
+    em {
+      color: #f5c842;
+      font-style: italic;
+    }
+  }
+
+  p {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 300;
+    max-width: 28ch;
+    line-height: 1.6;
+  }
+}
+
+.decorative-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(245, 200, 66, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 200, 66, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245, 200, 66, 0.12) 0%, transparent 70%);
+  }
+}
+
+// ─── Right Panel ─────────────────────────────────────────────────────────────
+.auth-right {
+  background: #fafaf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.card-header {
+  margin-bottom: 2.5rem;
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: #0d0d0d;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    color: #888;
+    font-size: 0.95rem;
+    font-weight: 300;
+  }
+}
+
+// ─── Alert ───────────────────────────────────────────────────────────────────
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+
+  &.alert-error {
+    background: #fff1f1;
+    color: #c0392b;
+    border: 1px solid #fecdcc;
+  }
+}
+
+.alert-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+// ─── Form Fields ─────────────────────────────────────────────────────────────
+.field {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.01em;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: #0d0d0d;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: #bbb;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #f5c842;
+      box-shadow: 0 0 0 4px rgba(245, 200, 66, 0.12);
+    }
+
+    &.invalid {
+      border-color: #e74c3c;
+      box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.08);
+    }
+  }
+}
+
+.input-group {
+  position: relative;
+
+  input {
+    padding-right: 3rem;
+  }
+}
+
+.toggle-pw {
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.field-error {
+  display: block;
+  font-size: 0.78rem;
+  color: #e74c3c;
+  margin-top: 0.375rem;
+}
+
+.forgot-link {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #888;
+  text-decoration: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #0d0d0d;
+  }
+}
+
+// ─── Submit Button ────────────────────────────────────────────────────────────
+.btn-primary {
+  width: 100%;
+  padding: 0.9rem;
+  background: #0d0d0d;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  letter-spacing: 0.01em;
+
+  &:hover:not(:disabled) {
+    background: #222;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.99);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ─── Footer ──────────────────────────────────────────────────────────────────
+.switch-auth {
+  text-align: center;
+  margin-top: 1.75rem;
+  font-size: 0.875rem;
+  color: #888;
+
+  a {
+    color: #0d0d0d;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1.5px solid #f5c842;
+    padding-bottom: 1px;
+    transition: border-color 0.2s;
+
+    &:hover {
+      border-color: #0d0d0d;
+    }
+  }
+}

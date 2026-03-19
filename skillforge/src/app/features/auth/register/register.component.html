@@ -1,0 +1,132 @@
+<div class="auth-wrapper">
+  <div class="auth-left">
+    <div class="brand">
+      <div class="logo-mark">SF</div>
+      <span class="brand-name">SkillForge</span>
+    </div>
+    <div class="hero-text">
+      <h1>Start your<br /><em>journey.</em></h1>
+      <p>Join thousands of learners on the path to mastery.</p>
+    </div>
+    <div class="decorative-grid"></div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="card-header">
+        <h2>Create account</h2>
+        <p>Get started with SkillForge today</p>
+      </div>
+
+      @if (errorMessage()) {
+      <div class="alert alert-error">
+        <span class="alert-icon">⚠</span>
+        {{ errorMessage() }}
+      </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Role Selector -->
+        <div class="role-selector">
+          @for (r of roles; track r.value) {
+          <button
+                  type="button"
+                  class="role-chip"
+                  [class.active]="form.value.role === r.value"
+                  (click)="selectRole(r.value)"
+          >
+            <span class="role-icon">{{ r.icon }}</span>
+            {{ r.label }}
+          </button>
+          }
+        </div>
+
+        <div class="field">
+          <label for="name">Full name</label>
+          <input
+                  id="name"
+                  type="text"
+                  formControlName="name"
+                  placeholder="Jane Smith"
+                  [class.invalid]="name.invalid && name.touched"
+                  autocomplete="name"
+          />
+          @if (name.invalid && name.touched) {
+          <span class="field-error">
+              {{ name.errors?.['required'] ? 'Name is required' : 'Minimum 2 characters' }}
+            </span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Email address</label>
+          <input
+                  id="email"
+                  type="email"
+                  formControlName="email"
+                  placeholder="you@example.com"
+                  [class.invalid]="email.invalid && email.touched"
+                  autocomplete="email"
+          />
+          @if (email.invalid && email.touched) {
+          <span class="field-error">
+              {{ email.errors?.['required'] ? 'Email is required' : 'Enter a valid email' }}
+            </span>
+          }
+        </div>
+
+        <div class="fields-row">
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-group">
+              <input
+                      id="password"
+                      [type]="showPassword() ? 'text' : 'password'"
+                      formControlName="password"
+                      placeholder="••••••••"
+                      [class.invalid]="password.invalid && password.touched"
+                      autocomplete="new-password"
+              />
+              <button type="button" class="toggle-pw" (click)="togglePassword()">
+                {{ showPassword() ? '🙈' : '👁' }}
+              </button>
+            </div>
+            @if (password.invalid && password.touched) {
+            <span class="field-error">Minimum 6 characters</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="confirm">Confirm password</label>
+            <input
+                    id="confirm"
+                    type="password"
+                    formControlName="confirmPassword"
+                    placeholder="••••••••"
+                    [class.invalid]="(confirmPassword.touched && form.errors?.['passwordMismatch'])"
+                    autocomplete="new-password"
+            />
+            @if (confirmPassword.touched && form.errors?.['passwordMismatch']) {
+            <span class="field-error">Passwords don't match</span>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="isLoading()">
+          @if (isLoading()) {
+          <span class="spinner"></span>
+          Creating account…
+          } @else {
+          Create account
+          }
+        </button>
+      </form>
+
+      <p class="switch-auth">
+        Already have an account?
+        <a routerLink="/auth/login">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,188 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
+        <nav class="sidebar-nav">
+            <a class="nav-item" (click)="navigate('/dashboard/student')"><span>🏠</span> Learning Home</a>
+            <a class="nav-item" (click)="navigate('/student/courses')"><span>📚</span> My Courses</a>
+            <a class="nav-item active"><span>📝</span> Quizzes</a>
+            <a class="nav-item" (click)="navigate('/student/progress')"><span>📊</span> Progress</a>
+            <a class="nav-item" (click)="navigate('/student/ai-tutor')"><span>🤖</span> AI Tutor</a>
+        </nav>
+        <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div><h1>Quizzes</h1><p>All quizzes available to you</p></div>
+        </header>
+
+        <div class="filter-tabs">
+            <button class="tab" [class.active]="filter() === 'all'" (click)="filter.set('all')">All</button>
+            <button class="tab" [class.active]="filter() === 'pending'" (click)="filter.set('pending')">Pending</button>
+            <button class="tab" [class.active]="filter() === 'completed'" (click)="filter.set('completed')">Completed</button>
+        </div>
+
+        @if (isLoading()) { <div class="loading-state"><div class="spinner"></div><p>Loading quizzes...</p></div> }
+        @if (errorMessage()) { <div class="alert-error">⚠ {{ errorMessage() }}</div> }
+
+        @if (!isLoading() && filtered.length === 0) {
+        <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <p>{{ filter() === 'completed' ? 'No completed quizzes yet.' : filter() === 'pending' ? '🎉 All quizzes completed!' : 'No quizzes available yet.' }}</p>
+        </div>
+        }
+
+        @if (!isLoading() && filtered.length > 0) {
+        <div class="quiz-grid">
+            @for (q of filtered; track q.id) {
+            <div class="quiz-card" [class.completed]="q.attempted">
+                <div class="quiz-card-top">
+                    <span class="diff-badge" [class]="getDifficultyClass(q.difficulty)">{{ q.difficulty }}</span>
+                    @if (q.generatedByAi) { <span class="ai-badge">🤖 AI</span> }
+                    @if (q.attempted) { <span class="done-badge">✓ Done</span> }
+                </div>
+                <h3 class="quiz-title">{{ q.title }}</h3>
+                <p class="quiz-course">📘 {{ q.course }}</p>
+                <div class="quiz-meta-row"><span>⏱ {{ q.timeLimit }} min</span></div>
+                @if (q.attempted && q.score !== null) {
+                <div class="score-display" [class]="getScoreClass(q.score)">
+                    Score: <strong>{{ q.score }}%</strong>
+                    <span class="pass-fail">{{ q.score >= 60 ? '✓ Passed' : '✗ Failed' }}</span>
+                </div>
+                }
+                @if (!q.attempted) {
+                <button class="btn-start" (click)="startQuiz(q.id)">Start Quiz →</button>
+                } @else {
+                <button class="btn-retry" (click)="startQuiz(q.id)">Retake →</button>
+                }
+            </div>
+            }
+        </div>
+        }
+    </main>
+</div>
+
+<!-- ── QUIZ OVERLAY ── -->
+@if (isLoadingQuiz()) {
+<div class="quiz-overlay">
+    <div class="quiz-loading"><div class="spinner-lg"></div><p>Loading quiz...</p></div>
+</div>
+}
+
+@if (activeQuiz() && !isLoadingQuiz()) {
+<div class="quiz-overlay">
+    <div class="quiz-panel">
+
+        <!-- Result Screen -->
+        @if (quizResult()) {
+        <div class="result-screen">
+            <div class="result-header">
+                <h2>Quiz Complete!</h2>
+                <button class="close-btn" (click)="closeQuiz()">✕</button>
+            </div>
+            <div class="result-body">
+                <div class="score-circle" [class]="getScoreClass(+quizResult()!.score)">
+                    <div class="score-big">{{ quizResult()!.score }}%</div>
+                    <div class="score-label">{{ +quizResult()!.score >= 60 ? '✓ Passed' : '✗ Failed' }}</div>
+                </div>
+                <p class="result-sub">{{ activeQuiz()!.title }}</p>
+                <div class="result-actions">
+                    <button class="btn-close-result" (click)="closeQuiz()">Back to Quizzes</button>
+                </div>
+
+                <!-- Review answers -->
+                <div class="review-section">
+                    <h3>Review Answers</h3>
+                    @for (q of activeQuiz()!.questions; track q.id; let i = $index) {
+                    <div class="review-item" [class.correct]="isCorrect(q.id.toString())" [class.wrong]="!isCorrect(q.id.toString())">
+                        <div class="review-q">
+                            <span class="review-badge">{{ isCorrect(q.id.toString()) ? '✓' : '✗' }}</span>
+                            <span>Q{{ i+1 }}. {{ q.question_text }}</span>
+                        </div>
+                        <div class="review-answers">
+                            <span class="your-answer">Your answer: <strong>{{ answers()[q.id] || 'Not answered' }}</strong></span>
+                            @if (!isCorrect(q.id.toString())) {
+                            <span class="correct-answer">Correct: <strong>{{ q.correct_answer }}</strong></span>
+                            }
+                        </div>
+                        @if (q.explanation) {
+                        <div class="review-explanation">💡 {{ q.explanation }}</div>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- Quiz Taking Screen -->
+        @if (!quizResult()) {
+        <!-- Header -->
+        <div class="quiz-header">
+            <div class="quiz-header-left">
+                <h2 class="quiz-name">{{ activeQuiz()!.title }}</h2>
+                <span class="quiz-progress-text">Question {{ currentQuestion() + 1 }} of {{ activeQuiz()!.questions.length }}</span>
+            </div>
+            <div class="quiz-header-right">
+                <div class="timer" [class.danger]="isTimeLow">
+                    ⏱ {{ formattedTime }}
+                </div>
+                <button class="close-btn" (click)="closeQuiz()">✕</button>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="quiz-progress-bar">
+            <div class="quiz-progress-fill"
+                 [style.width.%]="((currentQuestion() + 1) / activeQuiz()!.questions.length) * 100"></div>
+        </div>
+
+        <div class="quiz-body">
+            <!-- Question nav dots -->
+            <div class="question-dots">
+                @for (q of activeQuiz()!.questions; track q.id; let i = $index) {
+                <button class="dot"
+                        [class.active]="currentQuestion() === i"
+                        [class.answered]="isAnswered(q.id)"
+                        (click)="goToQuestion(i)">{{ i + 1 }}</button>
+                }
+            </div>
+
+            <!-- Current question -->
+            @let q = activeQuiz()!.questions[currentQuestion()];
+            <div class="question-block">
+                <div class="question-text">
+                    <span class="q-num">Q{{ currentQuestion() + 1 }}</span>
+                    {{ q.question_text }}
+                </div>
+                <div class="options-list">
+                    @for (opt of q.options; track opt) {
+                    <button class="option-btn"
+                            [class.selected]="isSelected(q.id, opt)"
+                            (click)="selectAnswer(q.id, opt)">
+                        <span class="opt-indicator"></span>
+                        {{ opt }}
+                    </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="quiz-nav">
+                <button class="nav-btn" [disabled]="currentQuestion() === 0" (click)="prevQuestion()">← Previous</button>
+                <div class="answered-count">{{ answeredCount }} / {{ activeQuiz()!.questions.length }} answered</div>
+                @if (currentQuestion() < activeQuiz()!.questions.length - 1) {
+                <button class="nav-btn primary" (click)="nextQuestion()">Next →</button>
+                } @else {
+                <button class="nav-btn submit" [disabled]="isSubmitting()" (click)="submitQuiz()">
+                    @if (isSubmitting()) { <span class="spinner-sm"></span> Submitting... }
+                    @else { Submit Quiz ✓ }
+                </button>
+                }
+            </div>
+        </div>
+        }
+
+    </div>
+</div>
+}

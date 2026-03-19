@@ -1,0 +1,161 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
+        <nav class="sidebar-nav">
+            <a class="nav-item" (click)="navigate('/dashboard/instructor')"><span>🏠</span> Overview</a>
+            <a class="nav-item" (click)="navigate('/courses')"><span>📘</span> My Courses</a>
+            <a class="nav-item active"><span>🤖</span> AI Quiz Generator</a>
+            <a class="nav-item" (click)="navigate('/students')"><span>👥</span> Students</a>
+            <a class="nav-item" (click)="navigate('/analytics')"><span>📊</span> Analytics</a>
+        </nav>
+        <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <h1>AI Quiz Generator</h1>
+                <p>Generate smart quizzes instantly using Groq AI</p>
+            </div>
+            @if (usage()) {
+            <div class="usage-meter-compact" [class.warn]="usage()!.warning" [class.danger]="usage()!.percent >= 90">
+                <div class="um-label">
+                    <span>🤖 Daily AI Quota</span>
+                    <span class="um-count">{{ usage()!.used }} / {{ usage()!.limit }}</span>
+                </div>
+                <div class="um-bar-track">
+                    <div class="um-bar-fill" [style.width.%]="usage()!.percent" [style.background]="getUsageBarColor()"></div>
+                </div>
+                <div class="um-pct">{{ usage()!.percent }}% used today</div>
+            </div>
+            } @else {
+            <div class="usage-skeleton"></div>
+            }
+        </header>
+
+        @if (showUsageWarning() && usage()) {
+        <div class="warning-banner" [class.exhausted-banner]="usage()!.exhausted">
+            <div class="wb-icon">{{ usage()!.exhausted ? '🚫' : '⚠️' }}</div>
+            <div class="wb-content">
+                @if (usage()!.exhausted) {
+                <strong>Daily AI quota exhausted!</strong>
+                <span>You've used all {{ usage()!.limit }} free requests for today. Resets at midnight.</span>
+                } @else {
+                <strong>Approaching daily limit!</strong>
+                <span>
+              {{ usage()!.used }} of {{ usage()!.limit }} requests used ({{ usage()!.percent }}%).
+              Use requests wisely.
+            </span>
+                }
+            </div>
+            <button class="wb-close" (click)="dismissWarning()">✕</button>
+        </div>
+        }
+
+        <div class="gen-layout">
+            <!-- LEFT: Form -->
+            <section class="gen-card">
+                <div class="gen-card-head">
+                    <div class="gen-title"><span>🤖</span> Generate Quiz</div>
+                    <span class="powered-badge">Powered by Groq</span>
+                </div>
+
+                @if (errorMessage()) {
+                <div class="alert-error">⚠ {{ errorMessage() }}</div>
+                }
+                @if (successMessage()) {
+                <div class="alert-success">✓ {{ successMessage() }}</div>
+                }
+
+                <form [formGroup]="form" (ngSubmit)="generate()">
+                    <div class="field">
+                        <label>TOPIC <span class="req">*</span></label>
+                        <input type="text" formControlName="topic"
+                               placeholder="e.g. Python lists, World War II, Algebra" />
+                        @if (form.controls.topic.invalid && form.controls.topic.touched) {
+                        <span class="field-error">Topic must be at least 3 characters</span>
+                        }
+                    </div>
+
+                    <div class="field">
+                        <label>SELECT COURSE <span class="req">*</span></label>
+                        @if (isLoadingCourses()) {
+                        <div class="select-skeleton"></div>
+                        } @else {
+                        <select formControlName="course_id">
+                            <option value="">— Select a course —</option>
+                            @for (c of courses(); track c.id) {
+                            <option [value]="c.id">{{ c.title }}</option>
+                            }
+                        </select>
+                        @if (form.controls.course_id.invalid && form.controls.course_id.touched) {
+                        <span class="field-error">Please select a course</span>
+                        }
+                        }
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label>NUMBER OF QUESTIONS</label>
+                            <select formControlName="num_questions">
+                                @for (n of questionCounts; track n) {
+                                <option [value]="n">{{ n }} questions</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>DIFFICULTY</label>
+                            <select formControlName="difficulty">
+                                @for (d of difficulties; track d) {
+                                <option [value]="d">{{ d }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    @if (usage() && usage()!.warning && !usage()!.exhausted) {
+                    <div class="inline-warn">⚠ Only {{ usage()!.limit - usage()!.used }} requests remaining today.</div>
+                    }
+
+                    <button type="submit" class="btn-generate" [disabled]="isGenerating() || usage()?.exhausted">
+                        @if (isGenerating()) { <span class="btn-spinner"></span> Generating... }
+                        @else if (usage()?.exhausted) { 🚫 Quota Exhausted }
+                        @else { ✨ Generate Quiz }
+                    </button>
+                </form>
+            </section>
+
+            <!-- RIGHT: Preview -->
+            <section class="preview-card">
+                <div class="preview-head"><span>📋</span> Preview</div>
+                @if (!generatedQuiz()) {
+                <div class="preview-empty">
+                    <div class="preview-robot">🤖</div>
+                    <p>Your generated quiz will appear here</p>
+                </div>
+                }
+                @if (generatedQuiz()) {
+                <div class="preview-quiz">
+                    <div class="pq-title">{{ generatedQuiz()!.title }}</div>
+                    <div class="pq-meta">{{ generatedQuiz()!.questions.length }} questions generated</div>
+                    <div class="pq-questions">
+                        @for (q of generatedQuiz()!.questions; track q.question_text; let i = $index) {
+                        <div class="pq-question">
+                            <div class="pq-q-text"><span class="pq-num">Q{{ i + 1 }}</span> {{ q.question_text }}</div>
+                            <div class="pq-options">
+                                @for (opt of q.options; track opt) {
+                                <div class="pq-opt" [class.correct]="opt === q.correct_answer">{{ opt }}</div>
+                                }
+                            </div>
+                            @if (q.explanation) {
+                            <div class="pq-explanation">💡 {{ q.explanation }}</div>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </section>
+        </div>
+    </main>
+</div>

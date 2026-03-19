@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+:host { display: block; height: 100vh; font-family: 'DM Sans', sans-serif; background: #f4f3ef; }
+.dashboard { display: grid; grid-template-columns: 240px 1fr; height: 100vh; overflow: hidden; }
+.sidebar { background: #0d0d0d; color: #fff; display: flex; flex-direction: column; padding: 1.75rem 1.25rem; }
+.sidebar-brand { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; font-size: 1.05rem; font-weight: 600; }
+.logo-mark { width: 36px; height: 36px; background: #f5c842; color: #0d0d0d; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+.sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; }
+.nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.875rem; border-radius: 10px; font-size: 0.875rem; color: rgba(255,255,255,0.55); cursor: pointer; text-decoration: none; transition: all 0.18s;
+  &:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+  &.active { background: rgba(245,200,66,0.12); color: #f5c842; font-weight: 500; }
+}
+.logout-btn { margin-top: auto; padding: 0.7rem 0.875rem; background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: rgba(255,255,255,0.45); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.18s;
+  &:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); }
+}
+.main { overflow-y: auto; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+.topbar { display: flex; justify-content: space-between; align-items: flex-start;
+  h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; color: #0d0d0d; margin: 0 0 0.25rem; em { font-style: italic; color: #c8960a; } }
+  p { color: #888; font-size: 0.9rem; margin: 0; }
+}
+.avatar-circle { width: 44px; height: 44px; border-radius: 50%; background: #f5c842; color: #0d0d0d; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.stat-card { background: #fff; border-radius: 14px; padding: 1.25rem; display: flex; align-items: flex-start; gap: 1rem; border: 1px solid #ece9e0;
+  .stat-icon { font-size: 1.75rem; flex-shrink: 0; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #0d0d0d; line-height: 1.1; }
+  .stat-label { font-size: 0.72rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.15rem; }
+}
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.card { background: #fff; border-radius: 16px; padding: 1.5rem; border: 1px solid #ece9e0; }
+.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;
+  h2 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0d0d0d; margin: 0; }
+}
+.btn-link { background: none; border: none; color: #b08800; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; padding: 0; }
+.course-list, .quiz-list { display: flex; flex-direction: column; gap: 0.625rem; }
+.course-row, .quiz-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: 10px; background: #fafaf8; border: 1px solid #ece9e0; cursor: pointer; transition: background 0.15s;
+  &:hover { background: #f0ede4; }
+}
+.course-icon-sm, .quiz-icon { font-size: 1.3rem; flex-shrink: 0; }
+.course-info, .quiz-info { flex: 1; min-width: 0; }
+.course-name, .quiz-name { font-size: 0.875rem; font-weight: 500; color: #0d0d0d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.course-meta, .quiz-meta { font-size: 0.75rem; color: #aaa; margin-top: 0.1rem; }
+.diff-pill { font-size: 0.68rem; padding: 0.2rem 0.55rem; border-radius: 100px; font-weight: 600; text-transform: uppercase; flex-shrink: 0;
+  &.beginner { background: #e8f5e9; color: #2e7d32; }
+  &.intermediate { background: #fff8e1; color: #f57f17; }
+  &.advanced { background: #fce4ec; color: #c62828; }
+}
+.empty-mini { padding: 1.5rem 0; text-align: center; p { color: #aaa; font-size: 0.875rem; margin: 0; } }
+.empty-state { display: flex; flex-direction: column; align-items: center; padding: 3rem; text-align: center; gap: 0.75rem;
+  .empty-icon { font-size: 2.5rem; }
+  p { color: #888; font-size: 0.9rem; margin: 0; }
+}
+.loading-state { display: flex; align-items: center; gap: 0.75rem; padding: 2rem; color: #888; font-size: 0.875rem; }
+.spinner { width: 20px; height: 20px; border: 2px solid #e0e0e0; border-top-color: #f5c842; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Profile Dropdown ──────────────────────────────────────────────────────────
+.profile-wrap { position: relative; }
+
+.avatar-circle {
+  width: 44px; height: 44px; border-radius: 50%; background: #f5c842; color: #0d0d0d;
+  font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  border: none; cursor: pointer; transition: all 0.18s;
+  &:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(245,200,66,0.4); }
+}
+
+.profile-dropdown {
+  position: absolute; top: calc(100% + 12px); right: 0;
+  width: 300px; background: #fff; border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.14); border: 1px solid #ece9e0;
+  z-index: 100; overflow: hidden;
+  animation: dropIn 0.18s ease;
+}
+@keyframes dropIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+.pd-header {
+  display: flex; align-items: center; gap: 0.875rem;
+  padding: 1.25rem 1.25rem 1rem; background: #0d0d0d;
+  .pd-avatar { width: 46px; height: 46px; border-radius: 50%; background: #f5c842; color: #0d0d0d;
+    font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pd-info { flex: 1; min-width: 0;
+    .pd-name { font-size: 0.95rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pd-email { font-size: 0.75rem; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.1rem; }
+  }
+  .pd-role-badge { display: inline-block; margin-top: 0.35rem; font-size: 0.65rem; font-weight: 700;
+    text-transform: uppercase; background: rgba(245,200,66,0.15); color: #f5c842;
+    padding: 0.15rem 0.5rem; border-radius: 20px; letter-spacing: 0.05em; }
+}
+
+.pd-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid #f0ede4; background: #fafaf8;
+  .pd-stat { padding: 0.875rem 0.5rem; text-align: center;
+    &:not(:last-child) { border-right: 1px solid #f0ede4; }
+    .pd-stat-val { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #0d0d0d; font-weight: 700; }
+    .pd-stat-label { font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.1rem; }
+  }
+}
+
+.pd-menu { padding: 0.5rem 0; border-bottom: 1px solid #f0ede4;
+  .pd-item { width: 100%; display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1.25rem;
+    background: none; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+    color: #333; cursor: pointer; text-align: left; transition: background 0.15s;
+    &:hover { background: #fafaf8; }
+    .pd-item-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .pd-arrow { margin-left: auto; color: #ccc; font-size: 1rem; }
+  }
+}
+
+.pd-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  .pd-since { font-size: 0.72rem; color: #bbb; }
+  .pd-logout { background: none; border: none; font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem; color: #e74c3c; cursor: pointer; font-weight: 500;
+    &:hover { color: #c0392b; }
+  }
+}

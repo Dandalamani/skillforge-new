@@ -1,0 +1,85 @@
+<div class="dashboard">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active"><span>⚙️</span> Admin Overview</a>
+      <a class="nav-item" (click)="navigate('/admin/users')"><span>👥</span> Users</a>
+      <a class="nav-item" (click)="navigate('/admin/courses')"><span>📘</span> Courses</a>
+      <a class="nav-item" (click)="navigate('/admin/ai-logs')"><span>🤖</span> AI Logs</a>
+      <a class="nav-item" (click)="navigate('/admin/reports')"><span>📊</span> Reports</a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><h1>Admin Control Panel</h1><p>Platform overview — {{ user()?.name }}</p></div>
+      <div class="header-actions">
+        <button class="btn-outline" (click)="navigate('/admin/reports')">Export Report</button>
+        <button class="btn-primary" (click)="navigate('/admin/users')">+ Manage Users</button>
+      </div>
+    </header>
+
+    @if (isLoading()) { <div class="loading-state"><div class="spinner"></div><p>Loading dashboard...</p></div> }
+
+    @if (!isLoading() && data()) {
+    <div class="stats-grid">
+      <div class="stat-card" style="--accent:#4a90e2">
+        <div class="stat-icon">👥</div>
+        <div><div class="stat-value">{{ data()!.totalUsers }}</div><div class="stat-label">Total Users</div><div class="stat-sub">{{ data()!.totalStudents }} students · {{ data()!.totalInstructors }} instructors</div></div>
+        <div class="stat-accent-bar"></div>
+      </div>
+      <div class="stat-card" style="--accent:#27ae60">
+        <div class="stat-icon">📘</div>
+        <div><div class="stat-value">{{ data()!.publishedCourses }}</div><div class="stat-label">Active Courses</div><div class="stat-sub">{{ data()!.totalCourses }} total</div></div>
+        <div class="stat-accent-bar"></div>
+      </div>
+      <div class="stat-card" style="--accent:#f5c842">
+        <div class="stat-icon">🤖</div>
+        <div><div class="stat-value">{{ data()!.aiQuizzes }}</div><div class="stat-label">AI Quizzes Generated</div><div class="stat-sub">{{ data()!.totalQuizzes }} total quizzes</div></div>
+        <div class="stat-accent-bar"></div>
+      </div>
+      <div class="stat-card" style="--accent:#2ecc71">
+        <div class="stat-icon">⚡</div>
+        <div><div class="stat-value">{{ data()!.totalAttempts }}</div><div class="stat-label">Quiz Attempts</div><div class="stat-sub">completed attempts</div></div>
+        <div class="stat-accent-bar"></div>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Recent Registrations</h2>
+        <div class="head-right">
+          <span class="pill">Last 7 days</span>
+          <button class="btn-link" (click)="navigate('/admin/users')">View all →</button>
+        </div>
+      </div>
+      @if (data()!.recentUsers.length === 0) {
+      <div class="empty-state"><p>No new users in the last 7 days.</p></div>
+      } @else {
+      <table class="user-table">
+        <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead>
+        <tbody>
+        @for (u of data()!.recentUsers; track u.id) {
+        <tr>
+          <td><div class="user-cell"><div class="user-avatar">{{ getInitial(u.name) }}</div>{{ u.name }}</div></td>
+          <td class="muted">{{ u.email }}</td>
+          <td><span class="role-badge" [class]="u.role.toLowerCase()">{{ u.role }}</span></td>
+          <td class="muted">{{ u.createdAt | date: 'MMM d, y' }}</td>
+          <td>
+            <button class="action-btn danger" (click)="confirmDelete(u)">🗑 Remove</button>
+          </td>
+        </tr>
+        }
+        </tbody>
+      </table>
+      }
+    </section>
+    }
+  </main>
+</div>
+
+<app-confirm-dialog
+        [visible]="showDialog()" [title]="dialogTitle()" [message]="dialogMessage()"
+        confirmLabel="Yes, Remove" type="danger"
+        (confirmed)="onDeleteConfirmed()" (cancelled)="showDialog.set(false)" />

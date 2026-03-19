@@ -1,0 +1,64 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap");
+:host{display:block;height:100vh;font-family:"DM Sans",sans-serif;background:#f4f3ef}
+.dashboard{display:grid;grid-template-columns:240px 1fr;height:100vh;overflow:hidden}
+.sidebar{background:#0d0d0d;color:#fff;display:flex;flex-direction:column;padding:1.75rem 1.25rem}
+.sidebar-brand{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;font-size:1.05rem;font-weight:600}
+.logo-mark{width:36px;height:36px;background:#f5c842;color:#0d0d0d;font-family:"Playfair Display",serif;font-weight:700;font-size:.875rem;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:.25rem}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .875rem;border-radius:10px;font-size:.875rem;color:rgba(255,255,255,.55);cursor:pointer;text-decoration:none;transition:all .18s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.nav-item.active{background:rgba(245,200,66,.12);color:#f5c842;font-weight:500}
+.logout-btn{margin-top:auto;padding:.7rem .875rem;background:none;border:1px solid rgba(255,255,255,.1);border-radius:10px;color:rgba(255,255,255,.45);font-family:"DM Sans",sans-serif;font-size:.85rem;cursor:pointer;transition:all .18s}
+.logout-btn:hover{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.7)}
+.main{overflow-y:auto;padding:2rem 2.5rem;display:flex;flex-direction:column;gap:1.5rem}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start}
+.topbar h1{font-family:"Playfair Display",serif;font-size:1.75rem;color:#0d0d0d;margin:0 0 .25rem}
+.topbar p{color:#888;font-size:.9rem;margin:0}
+.card{background:#fff;border-radius:16px;padding:1.5rem;border:1px solid #ece9e0}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.card-head h2{font-family:"Playfair Display",serif;font-size:1.05rem;color:#0d0d0d;margin:0}
+.pill{font-size:.75rem;padding:.25rem .7rem;background:#f4f3ef;border-radius:100px;color:#888;font-weight:500}
+.filter-tabs{display:flex;gap:.5rem}
+.tab{padding:.5rem 1.25rem;border-radius:100px;font-family:"DM Sans",sans-serif;font-size:.85rem;font-weight:500;border:1.5px solid #e0e0e0;background:#fff;color:#666;cursor:pointer;transition:all .18s}
+.tab.active{background:#0d0d0d;color:#fff;border-color:#0d0d0d}
+.loading-state{display:flex;align-items:center;gap:.75rem;padding:2rem;color:#888;font-size:.875rem}
+.spinner{width:20px;height:20px;border:2px solid #e0e0e0;border-top-color:#f5c842;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alert-error{background:#fff1f1;color:#c0392b;border:1px solid #fecdcc;border-radius:10px;padding:.75rem 1rem;font-size:.875rem}
+.empty-state{display:flex;flex-direction:column;align-items:center;padding:3rem;text-align:center;gap:.75rem}
+.empty-state .empty-icon{font-size:2.5rem}
+.empty-state p{color:#888;font-size:.9rem;margin:0}
+.muted{color:#aaa!important;font-size:.82rem!important}
+.user-table,.course-table,.log-table{width:100%;border-collapse:collapse}
+.user-table th,.course-table th,.log-table th{font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:#aaa;font-weight:600;padding:.5rem .75rem;text-align:left;border-bottom:1px solid #f0ede4}
+.user-table td,.course-table td,.log-table td{padding:.9rem .75rem;font-size:.875rem;color:#333;border-bottom:1px solid #f8f7f2;vertical-align:middle}
+.user-table tr:last-child td,.course-table tr:last-child td,.log-table tr:last-child td{border-bottom:none}
+.user-table tr:hover td,.course-table tr:hover td,.log-table tr:hover td{background:#fafaf8}
+.user-cell{display:flex;align-items:center;gap:.625rem;font-weight:500;color:#0d0d0d}
+.user-avatar{width:32px;height:32px;background:#f5c842;color:#0d0d0d;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+.role-badge{display:inline-block;padding:.2rem .65rem;border-radius:100px;font-size:.72rem;font-weight:700;text-transform:uppercase}
+.role-badge.student{background:#e3f2fd;color:#1565c0}
+.role-badge.instructor{background:#f3e5f5;color:#6a1b9a}
+.role-badge.admin{background:#fce4ec;color:#880e4f}
+.status-badge{display:inline-block;padding:.2rem .65rem;border-radius:100px;font-size:.72rem;font-weight:700;text-transform:uppercase}
+.status-badge.published{background:#e8f5e9;color:#2e7d32}
+.status-badge.draft{background:#f5f5f5;color:#616161}
+.diff-badge{font-size:.68rem;padding:.2rem .6rem;border-radius:100px;font-weight:600;text-transform:uppercase}
+.diff-badge.beginner{background:#e8f5e9;color:#2e7d32}
+.diff-badge.intermediate{background:#fff8e1;color:#f57f17}
+.diff-badge.advanced{background:#fce4ec;color:#c62828}
+.action-btn{padding:.35rem .75rem;border-radius:7px;border:1px solid #e0e0e0;background:#fff;font-family:"DM Sans",sans-serif;font-size:.78rem;cursor:pointer;transition:all .15s;margin-right:.25rem}
+.action-btn.danger{color:#e74c3c;border-color:#fecdcc}
+.action-btn.danger:hover{background:#fff1f1}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.stat-card{background:#fff;border-radius:14px;padding:1.25rem;display:flex;align-items:flex-start;gap:1rem;border:1px solid #ece9e0;position:relative;overflow:hidden}
+.stat-icon{font-size:1.75rem;flex-shrink:0}
+.stat-value{font-family:"Playfair Display",serif;font-size:1.5rem;color:#0d0d0d;line-height:1.1}
+.stat-label{font-size:.72rem;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-top:.15rem}
+.stat-sub{font-size:.72rem;color:#aaa;margin-top:.2rem}
+.stat-accent-bar{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,#f5c842)}
+.header-actions{display:flex;gap:.75rem}
+.btn-outline{padding:.7rem 1.25rem;background:#fff;color:#0d0d0d;border:1.5px solid #0d0d0d;border-radius:10px;font-family:"DM Sans",sans-serif;font-size:.875rem;font-weight:600;cursor:pointer}
+.btn-primary{padding:.7rem 1.25rem;background:#0d0d0d;color:#fff;border:none;border-radius:10px;font-family:"DM Sans",sans-serif;font-size:.875rem;font-weight:600;cursor:pointer}
+.head-right{display:flex;align-items:center;gap:.75rem}
+.btn-link{background:none;border:none;color:#b08800;font-family:"DM Sans",sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;padding:0}

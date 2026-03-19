@@ -1,0 +1,138 @@
+<div class="dashboard">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active"><span>🏠</span> Overview</a>
+      <a class="nav-item" (click)="navigate('/courses')"><span>📚</span> My Courses</a>
+      <a class="nav-item" (click)="navigate('/quiz-generator')"><span>🤖</span> AI Quiz Generator</a>
+      <a class="nav-item" (click)="navigate('/students')"><span>👥</span> Students</a>
+      <a class="nav-item" (click)="navigate('/analytics')"><span>📊</span> Analytics</a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>Instructor Panel</h1>
+        <p>Welcome back, {{ user()?.name }}</p>
+      </div>
+
+      <!-- Top-right actions -->
+      <div class="topbar-right">
+        <button class="btn-create" (click)="navigate('/courses/new')">+ New Course</button>
+
+        <!-- Profile Avatar + Dropdown -->
+        <div class="profile-wrap">
+          <button class="avatar-btn" (click)="toggleProfile()">{{ initials }}</button>
+
+          @if (showProfile()) {
+          <div class="profile-dropdown">
+            <div class="pd-header">
+              <div class="pd-avatar">{{ initials }}</div>
+              <div class="pd-info">
+                <div class="pd-name">{{ user()?.name }}</div>
+                <div class="pd-email">{{ user()?.email }}</div>
+                <span class="pd-badge">Instructor</span>
+              </div>
+            </div>
+            <div class="pd-stats">
+              <div class="pd-stat"><div class="pd-val">{{ totalCourses() }}</div><div class="pd-lbl">Courses</div></div>
+              <div class="pd-stat"><div class="pd-val">{{ publishedCourses() }}</div><div class="pd-lbl">Published</div></div>
+              <div class="pd-stat"><div class="pd-val">{{ draftCourses() }}</div><div class="pd-lbl">Drafts</div></div>
+            </div>
+            <div class="pd-menu">
+              <button class="pd-item" (click)="openProfileDrawer()">
+                <span>👤</span><span>My Profile</span><span class="pd-arrow">›</span>
+              </button>
+              <button class="pd-item" (click)="navigate('/courses')">
+                <span>📚</span><span>My Courses</span><span class="pd-arrow">›</span>
+              </button>
+
+            </div>
+            <div class="pd-footer">
+              <span class="pd-since">Instructor Account</span>
+              <button class="pd-logout" (click)="logout()">↩ Sign out</button>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">📘</div><div>
+        <div class="stat-value">@if (isLoading()) { <span class="skeleton-val"></span> } @else { {{ totalCourses() }} }</div>
+        <div class="stat-label">Total Courses</div>
+      </div></div>
+      <div class="stat-card"><div class="stat-icon">🚀</div><div>
+        <div class="stat-value">@if (isLoading()) { <span class="skeleton-val"></span> } @else { {{ publishedCourses() }} }</div>
+        <div class="stat-label">Published</div>
+      </div></div>
+      <div class="stat-card"><div class="stat-icon">📝</div><div>
+        <div class="stat-value">@if (isLoading()) { <span class="skeleton-val"></span> } @else { {{ draftCourses() }} }</div>
+        <div class="stat-label">Drafts</div>
+      </div></div>
+      <div class="stat-card"><div class="stat-icon">🤖</div><div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">AI Quizzes</div>
+      </div></div>
+    </div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Your Courses</h2>
+        <button class="btn-ai" (click)="navigate('/quiz-generator')">🤖 Generate Quiz with AI</button>
+      </div>
+
+      @if (isLoading()) {
+      <div class="loading-state"><div class="spinner"></div><p>Loading your courses...</p></div>
+      }
+      @if (!isLoading() && courses().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <p>You haven't created any courses yet.</p>
+        <button class="btn-primary" (click)="navigate('/courses/new')">+ Create Your First Course</button>
+      </div>
+      }
+      @if (!isLoading() && courses().length > 0) {
+      <table class="course-table">
+        <thead>
+        <tr><th>Course Title</th><th>Difficulty</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+        @for (course of courses(); track course.id) {
+        <tr>
+          <td class="course-title">{{ course.title }}</td>
+          <td><span class="diff-badge" [class]="getDifficultyClass(course.difficulty_level)">{{ course.difficulty_level }}</span></td>
+          <td><span class="status-badge" [class.published]="course.status === 'PUBLISHED'" [class.draft]="course.status === 'DRAFT'">{{ course.status }}</span></td>
+          <td class="muted">{{ course.createdAt | date:'MMM d, y' }}</td>
+          <td class="actions">
+            <button class="action-btn" (click)="editCourse(course.id)">✏️ Edit</button>
+            <button class="action-btn" (click)="navigate('/quiz-generator')">📝 Quiz</button>
+            <button class="action-btn danger" (click)="confirmDelete(course)">🗑 Delete</button>
+          </td>
+        </tr>
+        }
+        </tbody>
+      </table>
+      }
+    </section>
+  </main>
+</div>
+
+<app-confirm-dialog
+        [visible]="showDialog()"
+        [title]="dialogTitle()"
+        [message]="dialogMessage()"
+        confirmLabel="Yes, Delete"
+        cancelLabel="Cancel"
+        type="danger"
+        (confirmed)="onDeleteConfirmed()"
+        (cancelled)="onDeleteCancelled()"
+/>
+
+<!-- Profile Drawer -->
+@if (showProfileDrawer()) {
+<app-instructor-profile (closed)="showProfileDrawer.set(false)" />
+}

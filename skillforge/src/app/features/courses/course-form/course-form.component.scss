@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:host { display: block; min-height: 100vh; font-family: 'DM Sans', sans-serif; background: #f4f3ef; }
+
+.form-page { display: flex; justify-content: center; align-items: flex-start; padding: 3rem 2rem; min-height: 100vh; }
+
+.form-container { width: 100%; max-width: 640px; }
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+.form-header { margin-bottom: 2.5rem;
+  h1 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #0d0d0d; margin: 0.5rem 0 0.375rem; letter-spacing: -0.03em; }
+  p { color: #888; font-size: 0.9rem; margin: 0; }
+}
+
+.back-link { display: inline-flex; align-items: center; font-size: 0.85rem; color: #888; text-decoration: none; transition: color 0.2s; margin-bottom: 0.5rem;
+  &:hover { color: #0d0d0d; }
+}
+
+.alert-error { background: #fff1f1; color: #c0392b; border: 1px solid #fecdcc; border-radius: 10px; padding: 0.875rem 1rem; font-size: 0.875rem; margin-bottom: 1.5rem; }
+
+// ─── Fields ───────────────────────────────────────────────────────────────────
+.field { margin-bottom: 1.75rem;
+  label { display: block; font-size: 0.875rem; font-weight: 500; color: #333; margin-bottom: 0.5rem; }
+}
+
+.required { color: #e74c3c; }
+
+input[type="text"], textarea {
+  width: 100%; padding: 0.875rem 1rem; border: 1.5px solid #e0e0e0; border-radius: 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: #0d0d0d; background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; resize: vertical;
+  &::placeholder { color: #bbb; }
+  &:focus { outline: none; border-color: #f5c842; box-shadow: 0 0 0 4px rgba(245,200,66,0.12); }
+  &.invalid { border-color: #e74c3c; box-shadow: 0 0 0 4px rgba(231,76,60,0.08); }
+}
+
+.field-hint { display: flex; justify-content: space-between; align-items: center; margin-top: 0.375rem; min-height: 1.2rem; }
+
+.field-error { font-size: 0.78rem; color: #e74c3c; }
+
+.char-count { font-size: 0.75rem; color: #bbb; margin-left: auto;
+  &.over { color: #e74c3c; font-weight: 600; }
+}
+
+// ─── Difficulty Selector ──────────────────────────────────────────────────────
+.difficulty-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.875rem; }
+
+.difficulty-option {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  padding: 1.25rem 0.75rem; border-radius: 14px; border: 1.5px solid #e0e0e0;
+  background: #fff; cursor: pointer; transition: all 0.18s; text-align: center;
+
+  input[type="radio"] { display: none; }
+
+  .diff-icon { font-size: 1.75rem; }
+  .diff-label { font-size: 0.78rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  &:hover { border-color: #ccc; background: #fafaf8; }
+
+  &.beginner.selected { border-color: #27ae60; background: #f0faf2; .diff-label { color: #27ae60; } }
+  &.intermediate.selected { border-color: #f5c842; background: #fffbe6; .diff-label { color: #b08800; } }
+  &.advanced.selected { border-color: #e74c3c; background: #fff5f5; .diff-label { color: #e74c3c; } }
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+.skeleton-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.skeleton-line { background: linear-gradient(90deg, #f0ede4 25%, #e8e5dc 50%, #f0ede4 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 10px;
+  &.tall { height: 52px; }
+  &.xtall { height: 130px; }
+  &.short { height: 100px; }
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+.form-actions { display: flex; justify-content: flex-end; gap: 0.875rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #ece9e0; }
+
+.btn-primary { padding: 0.875rem 2rem; background: #0d0d0d; color: #fff; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;
+  &:hover:not(:disabled) { background: #222; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.btn-secondary { padding: 0.875rem 1.5rem; background: none; color: #555; border: 1.5px solid #e0e0e0; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  &:hover { border-color: #999; color: #0d0d0d; }
+}
+
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

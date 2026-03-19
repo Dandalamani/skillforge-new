@@ -1,0 +1,252 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
+        <nav class="sidebar-nav">
+            <a class="nav-item" (click)="navigate('/dashboard/student')"><span>🏠</span> Learning Home</a>
+            <a class="nav-item active"><span>📚</span> My Courses</a>
+            <a class="nav-item" (click)="navigate('/student/quizzes')"><span>📝</span> Quizzes</a>
+            <a class="nav-item" (click)="navigate('/student/progress')"><span>📊</span> Progress</a>
+            <a class="nav-item" (click)="navigate('/student/ai-tutor')"><span>🤖</span> AI Tutor</a>
+        </nav>
+        <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <h1>My Courses</h1>
+                <p>All available published courses</p>
+            </div>
+            <div class="profile-wrap">
+                <button class="avatar-circle" (click)="toggleProfile()">{{ firstName()[0] | uppercase }}</button>
+                @if (showProfile()) {
+                <div class="profile-dropdown">
+                    <div class="pd-header">
+                        <div class="pd-avatar">{{ firstName()[0] | uppercase }}</div>
+                        <div class="pd-info">
+                            <div class="pd-name">{{ user()?.name }}</div>
+                            <div class="pd-email">{{ user()?.email }}</div>
+                            <span class="pd-role-badge">Student</span>
+                        </div>
+                    </div>
+                    <div class="pd-menu">
+                        <button class="pd-item" (click)="navigate('/student/courses')"><span class="pd-item-icon">📚</span><span>My Courses</span><span class="pd-arrow">›</span></button>
+                        <button class="pd-item" (click)="navigate('/student/quizzes')"><span class="pd-item-icon">📝</span><span>My Quizzes</span><span class="pd-arrow">›</span></button>
+                        <button class="pd-item" (click)="navigate('/student/progress')"><span class="pd-item-icon">📊</span><span>My Progress</span><span class="pd-arrow">›</span></button>
+                    </div>
+                    <div class="pd-footer">
+                        <span class="pd-since">Member since {{ memberSince() }}</span>
+                        <button class="pd-logout" (click)="logout()">↩ Sign out</button>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        @if (isLoading()) {
+        <div class="loading-state"><div class="spinner"></div><p>Loading courses...</p></div>
+        }
+        @if (errorMessage()) { <div class="alert-error">⚠ {{ errorMessage() }}</div> }
+        @if (!isLoading() && courses().length === 0) {
+        <div class="empty-state"><div class="empty-icon">📚</div><p>No courses available yet.</p></div>
+        }
+
+        @if (!isLoading() && courses().length > 0) {
+        <div class="course-grid">
+            @for (c of courses(); track c.id) {
+            <div class="course-card" [class.started]="isStarted(c.id)">
+                <div class="card-top">
+                    <span class="diff-pill" [class]="getDifficultyClass(c.difficulty)">{{ c.difficulty }}</span>
+                    @if (isStarted(c.id)) { <span class="in-progress-badge">▶ In Progress</span> }
+                </div>
+                <div class="card-icon">📘</div>
+                <h3 class="course-title">{{ c.title }}</h3>
+                <p class="course-desc">{{ c.description || 'No description.' }}</p>
+                <div class="course-meta">
+                    <span>👨‍🏫 {{ c.instructor }}</span>
+                    <span>📝 {{ c.quizCount }} quizzes</span>
+                </div>
+                @if (isStarted(c.id)) {
+                <div class="progress-row">
+                    <span class="progress-label">{{ c.attempted }}/{{ c.quizCount }} quizzes attempted</span>
+                    <div class="progress-bar"><div class="progress-fill" [style.width.%]="c.quizCount > 0 ? (c.attempted/c.quizCount)*100 : 0"></div></div>
+                </div>
+                }
+                <div class="card-actions">
+                    @if (!isStarted(c.id)) {
+                    <button class="btn-start" (click)="startCourse(c)">🚀 Start Course</button>
+                    } @else {
+                    <button class="btn-resume" (click)="openCourse(c.id)">▶ Resume Course</button>
+                    <button class="btn-quiz" (click)="navigate('/student/quizzes')">📝 Quizzes</button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </main>
+</div>
+
+<!-- ── CONTENT VIEWER ── -->
+@if (viewingCourse()) {
+<div class="viewer-overlay" (click)="closeViewer()">
+    <div class="viewer-panel" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="viewer-header">
+            <div class="header-left">
+                <div class="course-badge">📘</div>
+                <div>
+                    <h2>{{ viewingCourse()!.title }}</h2>
+                    <div class="header-meta">
+                        <span>{{ viewingCourse()!.instructor.name }}</span>
+                        <span class="sep">·</span>
+                        <span class="diff-chip">{{ viewingCourse()!.difficulty_level }}</span>
+                        <span class="sep">·</span>
+                        <span>{{ contents().length }} lessons</span>
+                    </div>
+                </div>
+            </div>
+            <button class="close-btn" (click)="closeViewer()">✕</button>
+        </div>
+
+        <!-- Overall progress bar -->
+        <div class="viewer-progress-bar">
+            <div class="viewer-progress-fill" [style.width.%]="getViewerProgress()"></div>
+        </div>
+
+        @if (isLoadingContent()) {
+        <div class="viewer-loading"><div class="spinner"></div><p>Loading content...</p></div>
+        }
+        @if (!isLoadingContent() && contents().length === 0) {
+        <div class="viewer-empty">
+            <div class="empty-icon">📂</div>
+            <p>No content added yet.</p>
+            <p class="sub">Your instructor hasn't uploaded any lessons yet. Check back soon!</p>
+        </div>
+        }
+
+        @if (!isLoadingContent() && contents().length > 0) {
+        <div class="viewer-body">
+
+            <!-- Sidebar -->
+            <div class="content-sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Course Content</div>
+                    <div class="content-count">{{ contents().length }} lessons total</div>
+                </div>
+
+                @if (byType('VIDEO').length > 0) {
+                <div class="section-group">
+                    <span class="section-label">🎬 Videos</span>
+                    @for (item of byType('VIDEO'); track item.id) {
+                    <div class="content-item" [class.active]="activeContent()?.id === item.id" (click)="selectContent(item)">
+                        <span class="item-icon">▶</span>
+                        <div class="item-info">
+                            <div class="item-title">{{ item.title }}</div>
+                            <div class="item-type">Video lesson</div>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+                @if (byType('PDF').length > 0) {
+                <div class="section-group">
+                    <span class="section-label">📄 PDFs</span>
+                    @for (item of byType('PDF'); track item.id) {
+                    <div class="content-item" [class.active]="activeContent()?.id === item.id" (click)="selectContent(item)">
+                        <span class="item-icon">📄</span>
+                        <div class="item-info">
+                            <div class="item-title">{{ item.title }}</div>
+                            <div class="item-type">PDF document</div>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+                @if (byType('LINK').length > 0) {
+                <div class="section-group">
+                    <span class="section-label">🔗 Links</span>
+                    @for (item of byType('LINK'); track item.id) {
+                    <div class="content-item" [class.active]="activeContent()?.id === item.id" (click)="selectContent(item)">
+                        <span class="item-icon">🔗</span>
+                        <div class="item-info">
+                            <div class="item-title">{{ item.title }}</div>
+                            <div class="item-type">External resource</div>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+
+            <!-- Main area -->
+            <div class="content-main">
+                @if (activeContent()) {
+                <div class="content-viewer">
+                    <!-- Topbar -->
+                    <div class="content-topbar">
+                        <div class="content-breadcrumb">
+                            {{ viewingCourse()!.title }} <span> › </span>
+                            <span class="breadcrumb-active">{{ activeContent()!.title }}</span>
+                        </div>
+                        <span class="content-type-badge" [class]="activeContent()!.type.toLowerCase()">
+                    {{ activeContent()!.type }}
+                  </span>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="content-body">
+                        <h3 class="content-title">{{ activeContent()!.title }}</h3>
+                        @if (activeContent()!.description) {
+                        <p class="content-desc">{{ activeContent()!.description }}</p>
+                        }
+
+                        @if (isVideo(activeContent()!)) {
+                        <div class="video-container">
+                            <video controls [src]="getFileUrl(activeContent()!.url)" class="video-player"
+                                   (ended)="onContentComplete()"></video>
+                        </div>
+                        }
+
+                        @if (isPdf(activeContent()!)) {
+                        <div class="pdf-container">
+                            <iframe [src]="getFileUrl(activeContent()!.url)" class="pdf-viewer" title="pdf"></iframe>
+                        </div>
+                        <div class="pdf-actions">
+                            <a [href]="getFileUrl(activeContent()!.url)" target="_blank" class="btn-open-pdf">
+                                ↗ Open in new tab
+                            </a>
+                        </div>
+                        }
+
+                        @if (isLink(activeContent()!)) {
+                        <div class="link-container">
+                            <div class="link-hero">
+                                <span class="link-icon-big">🔗</span>
+                                <p class="link-title">{{ activeContent()!.title }}</p>
+                                <p class="link-url-display">{{ activeContent()!.url }}</p>
+                                <a [href]="activeContent()!.url" target="_blank" class="btn-open-link">
+                                    Open Resource →
+                                </a>
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Prev / Next navigation -->
+                    <div class="content-nav">
+                        <button class="nav-btn" [disabled]="!hasPrev()" (click)="prevContent()">← Previous</button>
+                        <span class="nav-position">{{ currentIndex() + 1 }} / {{ contents().length }}</span>
+                        <button class="nav-btn primary" [disabled]="!hasNext()" (click)="nextContent()">Next →</button>
+                    </div>
+                </div>
+                }
+            </div>
+
+        </div>
+        }
+
+    </div>
+</div>
+}

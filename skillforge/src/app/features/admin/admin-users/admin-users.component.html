@@ -1,0 +1,52 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
+        <nav class="sidebar-nav">
+            <a class="nav-item" (click)="navigate('/dashboard/admin')"><span>⚙️</span> Admin Overview</a>
+            <a class="nav-item active"><span>👥</span> Users</a>
+            <a class="nav-item" (click)="navigate('/admin/courses')"><span>📘</span> Courses</a>
+            <a class="nav-item" (click)="navigate('/admin/ai-logs')"><span>🤖</span> AI Logs</a>
+            <a class="nav-item" (click)="navigate('/admin/reports')"><span>📊</span> Reports</a>
+        </nav>
+        <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div><h1>Users</h1><p>Manage all platform users</p></div>
+            <span class="pill">{{ filtered.length }} users</span>
+        </header>
+        <div class="filter-tabs">
+            @for (r of roleFilters; track r) {
+            <button class="tab" [class.active]="filterRole() === r" (click)="setFilter(r)">{{ r }}</button>
+            }
+        </div>
+        @if (isLoading()) { <div class="loading-state"><div class="spinner"></div><p>Loading users...</p></div> }
+        @if (errorMessage()) { <div class="alert-error">⚠ {{ errorMessage() }}</div> }
+        @if (!isLoading() && filtered.length === 0) {
+        <div class="empty-state"><div class="empty-icon">👥</div><p>No users found.</p></div>
+        }
+        @if (!isLoading() && filtered.length > 0) {
+        <section class="card">
+            <table class="user-table">
+                <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Quiz Attempts</th><th>Joined</th><th>Actions</th></tr></thead>
+                <tbody>
+                @for (u of filtered; track u.id) {
+                <tr>
+                    <td><div class="user-cell"><div class="user-avatar">{{ getInitial(u.name) }}</div>{{ u.name }}</div></td>
+                    <td class="muted">{{ u.email }}</td>
+                    <td><span class="role-badge" [class]="u.role.toLowerCase()">{{ u.role }}</span></td>
+                    <td>{{ u.attempts !== null ? u.attempts : '—' }}</td>
+                    <td class="muted">{{ u.createdAt | date: 'MMM d, y' }}</td>
+                    <td><button class="action-btn danger" (click)="confirmDelete(u)">🗑 Remove</button></td>
+                </tr>
+                }
+                </tbody>
+            </table>
+        </section>
+        }
+    </main>
+</div>
+<app-confirm-dialog
+        [visible]="showDialog()" [title]="dialogTitle()" [message]="dialogMessage()"
+        confirmLabel="Yes, Remove" type="danger"
+        (confirmed)="onDeleteConfirmed()" (cancelled)="closeDialog()" />

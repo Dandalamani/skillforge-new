@@ -1,0 +1,322 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
+        <nav class="sidebar-nav">
+            <a class="nav-item" (click)="navigate('/dashboard/instructor')"><span>🏠</span> Overview</a>
+            <a class="nav-item active" (click)="navigate('/courses')"><span>📘</span> My Courses</a>
+            <a class="nav-item" (click)="navigate('/quiz-generator')"><span>🤖</span> AI Quiz Generator</a>
+            <a class="nav-item" (click)="navigate('/students')"><span>👥</span> Students</a>
+            <a class="nav-item" (click)="navigate('/analytics')"><span>📊</span> Analytics</a>
+        </nav>
+        <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+    </aside>
+
+    <main class="main">
+        <header class="page-header">
+            <div class="header-left">
+                <button class="back-btn" (click)="navigate('/courses')">← Back</button>
+                <div>
+                    <h1>Course Content</h1>
+                    <p class="subtitle">{{ courseName() || 'Loading...' }}</p>
+                </div>
+            </div>
+            <div class="content-stats">
+                <span class="stat-chip video">🎬 {{ byType('VIDEO').length }} Videos</span>
+                <span class="stat-chip pdf">📄 {{ byType('PDF').length }} PDFs</span>
+                <span class="stat-chip link">🔗 {{ byType('LINK').length }} Links</span>
+            </div>
+        </header>
+
+        <div class="content-layout">
+
+            <!-- LEFT: Add Content Panel -->
+            <section class="add-panel">
+                <div class="tab-bar">
+                    <button class="tab-btn" [class.active]="activeTab() === 'video'" (click)="setTab('video')">🎬 Video</button>
+                    <button class="tab-btn" [class.active]="activeTab() === 'pdf'" (click)="setTab('pdf')">📄 PDF</button>
+                    <button class="tab-btn" [class.active]="activeTab() === 'link'" (click)="setTab('link')">🔗 Link</button>
+                </div>
+
+                <!-- VIDEO TAB -->
+                @if (activeTab() === 'video') {
+                <div class="tab-content">
+                    <h3>Upload Video</h3>
+                    <p class="tab-desc">Supports MP4, WebM, MOV · Max 500MB</p>
+
+                    @if (uploadError()) {
+                    <div class="alert-error">⚠ {{ uploadError() }}</div>
+                    }
+                    @if (uploadSuccess()) {
+                    <div class="alert-success">✓ {{ uploadSuccess() }}</div>
+                    }
+
+                    <div class="dropzone"
+                         [class.has-file]="selectedFile()"
+                         (click)="videoInput.click()"
+                         (dragover)="onDragOver($event)"
+                         (drop)="onFileDrop($event)">
+                        <input #videoInput type="file" accept=".mp4,.webm,.mov,.avi,.mkv" hidden (change)="onFileSelected($event)" />
+                        @if (!selectedFile()) {
+                        <div class="drop-idle">
+                            <span class="drop-icon">🎬</span>
+                            <p>Click or drag and drop your video here</p>
+                            <span class="drop-hint">MP4, WebM, MOV up to 500MB</span>
+                        </div>
+                        } @else {
+                        <div class="drop-selected">
+                            <span class="file-icon">🎬</span>
+                            <div class="file-meta">
+                                <p class="file-name">{{ selectedFile()!.name }}</p>
+                                <p class="file-size">{{ formatSize(selectedFile()!.size) }}</p>
+                            </div>
+                            <button class="clear-btn" (click)="$event.stopPropagation(); clearFile()">✕</button>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="field">
+                        <label>Title</label>
+                        <input type="text" [value]="uploadTitle()" (input)="setUploadTitle($any($event.target).value)" placeholder="Video title" />
+                    </div>
+                    <div class="field">
+                        <label>Description <span class="optional">(optional)</span></label>
+                        <textarea rows="2" [value]="uploadDesc()" (input)="setUploadDesc($any($event.target).value)" placeholder="Brief description..."></textarea>
+                    </div>
+
+                    @if (uploadProgress() !== null) {
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" [style.width.%]="uploadProgress()"></div>
+                        </div>
+                        <span class="progress-label">{{ uploadProgress() }}%</span>
+                    </div>
+                    }
+
+                    <button class="btn-upload" [disabled]="isUploading() || !selectedFile()" (click)="uploadFile()">
+                        @if (isUploading()) {
+                        <span class="spinner"></span> Uploading...
+                        } @else {
+                        ⬆ Upload Video
+                        }
+                    </button>
+                </div>
+                }
+
+                <!-- PDF TAB -->
+                @if (activeTab() === 'pdf') {
+                <div class="tab-content">
+                    <h3>Upload PDF</h3>
+                    <p class="tab-desc">Upload lecture notes, worksheets, or study guides · Max 500MB</p>
+
+                    @if (uploadError()) {
+                    <div class="alert-error">⚠ {{ uploadError() }}</div>
+                    }
+                    @if (uploadSuccess()) {
+                    <div class="alert-success">✓ {{ uploadSuccess() }}</div>
+                    }
+
+                    <div class="dropzone pdf-zone"
+                         [class.has-file]="selectedFile()"
+                         (click)="pdfInput.click()"
+                         (dragover)="onDragOver($event)"
+                         (drop)="onFileDrop($event)">
+                        <input #pdfInput type="file" accept=".pdf" hidden (change)="onFileSelected($event)" />
+                        @if (!selectedFile()) {
+                        <div class="drop-idle">
+                            <span class="drop-icon">📄</span>
+                            <p>Click or drag and drop your PDF here</p>
+                            <span class="drop-hint">PDF files only</span>
+                        </div>
+                        } @else {
+                        <div class="drop-selected">
+                            <span class="file-icon">📄</span>
+                            <div class="file-meta">
+                                <p class="file-name">{{ selectedFile()!.name }}</p>
+                                <p class="file-size">{{ formatSize(selectedFile()!.size) }}</p>
+                            </div>
+                            <button class="clear-btn" (click)="$event.stopPropagation(); clearFile()">✕</button>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="field">
+                        <label>Title</label>
+                        <input type="text" [value]="uploadTitle()" (input)="setUploadTitle($any($event.target).value)" placeholder="PDF title" />
+                    </div>
+                    <div class="field">
+                        <label>Description <span class="optional">(optional)</span></label>
+                        <textarea rows="2" [value]="uploadDesc()" (input)="setUploadDesc($any($event.target).value)" placeholder="Brief description..."></textarea>
+                    </div>
+
+                    @if (uploadProgress() !== null) {
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill pdf" [style.width.%]="uploadProgress()"></div>
+                        </div>
+                        <span class="progress-label">{{ uploadProgress() }}%</span>
+                    </div>
+                    }
+
+                    <button class="btn-upload pdf-btn" [disabled]="isUploading() || !selectedFile()" (click)="uploadFile()">
+                        @if (isUploading()) {
+                        <span class="spinner"></span> Uploading...
+                        } @else {
+                        ⬆ Upload PDF
+                        }
+                    </button>
+                </div>
+                }
+
+                <!-- LINK TAB -->
+                @if (activeTab() === 'link') {
+                <div class="tab-content">
+                    <h3>Add Link</h3>
+                    <p class="tab-desc">Add YouTube videos, articles, GitHub repos, or any URL</p>
+
+                    @if (linkError()) {
+                    <div class="alert-error">⚠ {{ linkError() }}</div>
+                    }
+                    @if (linkSuccess()) {
+                    <div class="alert-success">✓ {{ linkSuccess() }}</div>
+                    }
+
+                    <div class="field">
+                        <label>Title <span class="req">*</span></label>
+                        <input type="text" [formControl]="titleControl" placeholder="e.g. Python Crash Course (YouTube)" />
+                        @if (titleControl.invalid && titleControl.touched) {
+                        <span class="field-error">Title is required</span>
+                        }
+                    </div>
+                    <div class="field">
+                        <label>URL <span class="req">*</span></label>
+                        <input type="url" [formControl]="urlControl" placeholder="https://youtube.com/watch?v=..." />
+                        @if (urlControl.invalid && urlControl.touched) {
+                        <span class="field-error">Enter a valid URL (must start with http/https)</span>
+                        }
+                    </div>
+                    <div class="field">
+                        <label>Description <span class="optional">(optional)</span></label>
+                        <textarea rows="2" [formControl]="descControl" placeholder="What will students find here?"></textarea>
+                    </div>
+
+                    <button class="btn-upload link-btn" [disabled]="isAddingLink()" (click)="addLink()">
+                        @if (isAddingLink()) {
+                        <span class="spinner"></span> Adding...
+                        } @else {
+                        + Add Link
+                        }
+                    </button>
+                </div>
+                }
+            </section>
+
+            <!-- RIGHT: Content List -->
+            <section class="content-list-panel">
+                <h3>All Content <span class="count-badge">{{ contents().length }}</span></h3>
+
+                @if (isLoading()) {
+                <div class="skeleton-list">
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                </div>
+                }
+
+                @if (!isLoading() && contents().length === 0) {
+                <div class="empty-state">
+                    <span>📂</span>
+                    <p>No content yet. Upload a video, PDF, or add a link to get started.</p>
+                </div>
+                }
+
+                @if (!isLoading() && contents().length > 0) {
+
+                @if (byType('VIDEO').length > 0) {
+                <div class="content-group">
+                    <div class="group-label">🎬 Videos</div>
+                    @for (c of byType('VIDEO'); track c.id) {
+                    <div class="content-item">
+                        <div class="ci-icon video">🎬</div>
+                        <div class="ci-info">
+                            <p class="ci-title">{{ c.title }}</p>
+                            <p class="ci-meta">
+                                @if (c.file_name) { {{ c.file_name }} &middot; }
+                                @if (c.file_size) { {{ formatSize(c.file_size) }} &middot; }
+                                {{ c.createdAt | date:'MMM d, y' }}
+                            </p>
+                            @if (c.description) {
+                            <p class="ci-desc">{{ c.description }}</p>
+                            }
+                        </div>
+                        <div class="ci-actions">
+                            <a [href]="getFileUrl(c.url)" target="_blank" class="btn-view">▶ View</a>
+                            <button class="btn-del" (click)="confirmDelete(c)">🗑</button>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+
+                @if (byType('PDF').length > 0) {
+                <div class="content-group">
+                    <div class="group-label">📄 PDFs</div>
+                    @for (c of byType('PDF'); track c.id) {
+                    <div class="content-item">
+                        <div class="ci-icon pdf">📄</div>
+                        <div class="ci-info">
+                            <p class="ci-title">{{ c.title }}</p>
+                            <p class="ci-meta">
+                                @if (c.file_name) { {{ c.file_name }} &middot; }
+                                @if (c.file_size) { {{ formatSize(c.file_size) }} &middot; }
+                                {{ c.createdAt | date:'MMM d, y' }}
+                            </p>
+                            @if (c.description) {
+                            <p class="ci-desc">{{ c.description }}</p>
+                            }
+                        </div>
+                        <div class="ci-actions">
+                            <a [href]="getFileUrl(c.url)" target="_blank" class="btn-view pdf">📖 Open</a>
+                            <button class="btn-del" (click)="confirmDelete(c)">🗑</button>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+
+                @if (byType('LINK').length > 0) {
+                <div class="content-group">
+                    <div class="group-label">🔗 Links</div>
+                    @for (c of byType('LINK'); track c.id) {
+                    <div class="content-item">
+                        <div class="ci-icon link">🔗</div>
+                        <div class="ci-info">
+                            <p class="ci-title">{{ c.title }}</p>
+                            <p class="ci-meta ci-url">{{ c.url }}</p>
+                            @if (c.description) {
+                            <p class="ci-desc">{{ c.description }}</p>
+                            }
+                        </div>
+                        <div class="ci-actions">
+                            <a [href]="c.url" target="_blank" class="btn-view link">🔗 Open</a>
+                            <button class="btn-del" (click)="confirmDelete(c)">🗑</button>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+
+                }
+            </section>
+        </div>
+    </main>
+</div>
+
+<app-confirm-dialog
+        [visible]="showDialog()"
+        [title]="dialogTitle()"
+        [message]="dialogMessage()"
+        confirmLabel="Delete"
+        confirmClass="danger"
+        (confirmed)="onDeleteConfirmed()"
+        (cancelled)="closeDialog()"
+/>

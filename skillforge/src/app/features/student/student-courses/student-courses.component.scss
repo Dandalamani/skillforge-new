@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+:host { display: block; height: 100vh; font-family: 'DM Sans', sans-serif; background: #f4f3ef; }
+.dashboard { display: grid; grid-template-columns: 240px 1fr; height: 100vh; overflow: hidden; }
+.sidebar { background: #0d0d0d; color: #fff; display: flex; flex-direction: column; padding: 1.75rem 1.25rem; }
+.sidebar-brand { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; font-size: 1.05rem; font-weight: 600; }
+.logo-mark { width: 36px; height: 36px; background: #f5c842; color: #0d0d0d; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+.sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; }
+.nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.875rem; border-radius: 10px; font-size: 0.875rem; color: rgba(255,255,255,0.55); cursor: pointer; text-decoration: none; transition: all 0.18s;
+  &:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+  &.active { background: rgba(245,200,66,0.12); color: #f5c842; font-weight: 500; }
+}
+.logout-btn { margin-top: auto; padding: 0.7rem 0.875rem; background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: rgba(255,255,255,0.45); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.18s;
+  &:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); }
+}
+.main { overflow-y: auto; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+.topbar { h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; color: #0d0d0d; margin: 0 0 0.25rem; } p { color: #888; font-size: 0.9rem; margin: 0; } }
+.loading-state { display: flex; align-items: center; gap: 0.75rem; padding: 2rem; color: #888; font-size: 0.875rem; }
+.spinner { width: 20px; height: 20px; border: 2px solid #e0e0e0; border-top-color: #f5c842; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.alert-error { background: #fff0f0; border: 1px solid #fcc; color: #c00; padding: 1rem; border-radius: 10px; font-size: 0.875rem; }
+.empty-state { display: flex; flex-direction: column; align-items: center; padding: 3rem; text-align: center; gap: 0.75rem; .empty-icon { font-size: 2.5rem; } p { color: #888; font-size: 0.9rem; margin: 0; } }
+.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+.course-card { background: #fff; border-radius: 16px; padding: 1.5rem; border: 1px solid #ece9e0; display: flex; flex-direction: column; gap: 0.75rem; transition: all 0.18s;
+  &:hover { background: #fafaf8; border-color: #d8d4c8; }
+  &.started { border-color: #d4edda; }
+}
+.card-top { display: flex; align-items: center; justify-content: space-between; }
+.diff-pill { font-size: 0.68rem; padding: 0.2rem 0.55rem; border-radius: 100px; font-weight: 600; text-transform: uppercase;
+  &.beginner { background: #e8f5e9; color: #2e7d32; } &.intermediate { background: #fff8e1; color: #f57f17; } &.advanced { background: #fce4ec; color: #c62828; }
+}
+.in-progress-badge { font-size: 0.68rem; font-weight: 600; color: #2e7d32; background: #e8f5e9; padding: 0.2rem 0.55rem; border-radius: 100px; }
+.card-icon { font-size: 1.75rem; }
+.course-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0d0d0d; margin: 0; }
+.course-desc { font-size: 0.82rem; color: #888; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }
+.course-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.75rem; color: #aaa; }
+.progress-row { .progress-label { font-size: 0.75rem; color: #aaa; margin-bottom: 0.3rem; display: block; } .progress-bar { height: 5px; background: #f0ede4; border-radius: 3px; .progress-fill { height: 100%; background: #f5c842; border-radius: 3px; transition: width 0.3s; } } }
+.card-actions { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
+.btn-start { flex: 1; padding: 0.7rem; background: #0d0d0d; color: #f5c842; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.18s; &:hover { background: #1a1a1a; } }
+.btn-resume { flex: 1; padding: 0.7rem; background: #f5c842; color: #0d0d0d; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.18s; &:hover { background: #e6b800; } }
+.btn-quiz { padding: 0.7rem 1rem; background: #fafaf8; color: #0d0d0d; border: 1px solid #ece9e0; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; cursor: pointer; transition: all 0.18s; &:hover { background: #f0ede4; } }
+
+// ── VIEWER ────────────────────────────────────────────────────────────────────
+.viewer-overlay {
+  position: fixed; inset: 0; background: rgba(13,13,13,0.75); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+  backdrop-filter: blur(4px);
+}
+.viewer-panel {
+  background: #fff; border-radius: 20px; width: 100%; max-width: 1100px;
+  height: 88vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 32px 100px rgba(0,0,0,0.35);
+}
+
+// Header
+.viewer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.5rem; background: #0d0d0d; color: #fff; flex-shrink: 0;
+  border-radius: 20px 20px 0 0;
+  .header-left { display: flex; align-items: center; gap: 1rem;
+    .course-badge { width: 40px; height: 40px; background: rgba(245,200,66,0.15); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+    h2 { font-family: 'Playfair Display', serif; font-size: 1.15rem; margin: 0 0 0.15rem; }
+    .header-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: rgba(255,255,255,0.45);
+      .sep { opacity: 0.3; }
+      .diff-chip { background: rgba(245,200,66,0.2); color: #f5c842; padding: 0.1rem 0.5rem; border-radius: 20px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
+    }
+  }
+  .close-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.08); border: none; color: rgba(255,255,255,0.7); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.18s; flex-shrink: 0;
+    &:hover { background: rgba(255,255,255,0.16); color: #fff; }
+  }
+}
+
+// Progress bar under header
+.viewer-progress-bar {
+  height: 3px; background: rgba(255,255,255,0.08); flex-shrink: 0;
+  .viewer-progress-fill { height: 100%; background: #f5c842; transition: width 0.4s; }
+}
+
+.viewer-loading, .viewer-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; gap: 1rem; color: #aaa; text-align: center;
+  .empty-icon { font-size: 3rem; }
+  p { font-size: 0.9rem; margin: 0; color: #888; }
+  .sub { font-size: 0.8rem; color: #bbb; }
+}
+
+.viewer-body { display: flex; flex: 1; overflow: hidden; }
+
+// Sidebar
+.content-sidebar {
+  width: 260px; background: #fafaf8; border-right: 1px solid #ece9e0;
+  overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0;
+  .sidebar-header { padding: 1rem 1.25rem 0.5rem; border-bottom: 1px solid #ece9e0; margin-bottom: 0.5rem;
+    .sidebar-title { font-size: 0.72rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; }
+    .content-count { font-size: 0.72rem; color: #bbb; margin-top: 0.1rem; }
+  }
+  .section-group { margin-bottom: 0.25rem; }
+  .section-label { font-size: 0.68rem; font-weight: 700; color: #bbb; text-transform: uppercase;
+    letter-spacing: 0.08em; padding: 0.6rem 1.25rem 0.3rem; display: flex; align-items: center; gap: 0.4rem;
+  }
+  .content-item {
+    display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 1.25rem;
+    cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; margin: 0.1rem 0;
+    &:hover { background: #f0ede4; }
+    &.active { background: #fff8e1; border-left-color: #f5c842;
+      .item-title { color: #0d0d0d; font-weight: 600; }
+      .item-icon { opacity: 1; }
+    }
+    .item-icon { font-size: 1rem; flex-shrink: 0; opacity: 0.5; transition: opacity 0.15s; }
+    .item-info { flex: 1; min-width: 0;
+      .item-title { font-size: 0.82rem; color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .item-type { font-size: 0.68rem; color: #bbb; margin-top: 0.1rem; }
+    }
+  }
+}
+
+// Main content area
+.content-main { flex: 1; overflow: hidden; background: #fff; display: flex; flex-direction: column; }
+
+.content-viewer { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+
+// Content top bar
+.content-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.5rem; border-bottom: 1px solid #f0ede4; flex-shrink: 0;
+  .content-breadcrumb { font-size: 0.75rem; color: #bbb;
+    .breadcrumb-active { color: #0d0d0d; font-weight: 500; }
+  }
+  .content-type-badge { font-size: 0.68rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 20px; text-transform: uppercase;
+    &.video { background: #e8f0fe; color: #1a73e8; }
+    &.pdf { background: #fce8e6; color: #d93025; }
+    &.link { background: #e6f4ea; color: #188038; }
+  }
+}
+
+.content-body { flex: 1; padding: 1rem 1.5rem; overflow-y: auto;
+  .content-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #0d0d0d; margin: 0 0 0.4rem; }
+  .content-desc { font-size: 0.85rem; color: #888; line-height: 1.6; margin: 0 0 1.25rem; }
+}
+
+// Video
+.video-container {
+  background: #000; border-radius: 14px; overflow: hidden; margin-bottom: 1rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  .video-player { width: 100%; height: 340px; max-height: 340px; display: block; outline: none; object-fit: contain; }
+}
+
+// PDF
+.pdf-container {
+  border-radius: 14px; overflow: hidden; border: 1px solid #ece9e0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 0.75rem;
+  .pdf-viewer { width: 100%; height: calc(88vh - 280px); min-height: 360px; border: none; display: block; }
+}
+.pdf-actions { display: flex; gap: 0.75rem; align-items: center;
+  .btn-open-pdf { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1rem;
+    background: #fafaf8; border: 1px solid #ece9e0; border-radius: 8px; font-size: 0.82rem;
+    font-weight: 500; color: #555; text-decoration: none; transition: all 0.15s;
+    &:hover { background: #f0ede4; color: #0d0d0d; }
+  }
+}
+
+// Link
+.link-container {
+  .link-hero { background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 100%);
+    border-radius: 16px; padding: 2rem; color: #fff; margin-bottom: 1rem;
+    .link-icon-big { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+    .link-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin: 0 0 0.5rem; }
+    .link-url-display { font-size: 0.78rem; color: rgba(255,255,255,0.4); word-break: break-all; margin: 0 0 1.25rem; }
+    .btn-open-link { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.5rem;
+      background: #f5c842; color: #0d0d0d; border-radius: 10px; font-weight: 700;
+      font-size: 0.9rem; text-decoration: none; transition: all 0.18s;
+      &:hover { background: #e6b800; transform: translateY(-1px); }
+    }
+  }
+}
+
+// Navigation footer
+.content-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.875rem 1.5rem; border-top: 1px solid #f0ede4; background: #fafaf8; flex-shrink: 0;
+  .nav-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem;
+    background: #fff; border: 1px solid #ece9e0; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: #555; cursor: pointer; transition: all 0.15s;
+    &:hover:not(:disabled) { background: #f0ede4; color: #0d0d0d; border-color: #d8d4c8; }
+    &:disabled { opacity: 0.35; cursor: not-allowed; }
+    &.primary { background: #0d0d0d; color: #f5c842; border-color: #0d0d0d; font-weight: 600;
+      &:hover:not(:disabled) { background: #1a1a1a; }
+    }
+  }
+  .nav-position { font-size: 0.78rem; color: #aaa; }
+}

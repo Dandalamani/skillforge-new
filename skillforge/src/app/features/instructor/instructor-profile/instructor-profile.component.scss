@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+.drawer-backdrop { position: fixed; inset: 0; background: rgba(13,13,13,0.5); z-index: 900; backdrop-filter: blur(2px); animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.drawer-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; background: #fff; z-index: 901; display: flex; flex-direction: column; overflow: hidden; box-shadow: -8px 0 40px rgba(0,0,0,0.18); animation: slideIn 0.25s cubic-bezier(0.32,0.72,0,1); }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+.drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; background: #0d0d0d; flex-shrink: 0;
+  .drawer-header-left { display: flex; align-items: center; gap: 0.875rem; }
+  .drawer-avatar { width: 44px; height: 44px; border-radius: 50%; background: #f5c842; color: #0d0d0d; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .drawer-name { font-size: 0.95rem; font-weight: 600; color: #fff; }
+  .drawer-role { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 0.1rem; letter-spacing: 0.03em; }
+  .drawer-close { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: rgba(255,255,255,0.7); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    &:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  }
+}
+
+// Instructor stats bar
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); background: #fafaf8; border-bottom: 1px solid #ece9e0; flex-shrink: 0;
+  .sbar-item { padding: 0.875rem 0.5rem; text-align: center; border-right: 1px solid #ece9e0;
+    &:last-child { border-right: none; }
+    .sbar-val { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0d0d0d; font-weight: 700; }
+    .sbar-label { font-size: 0.62rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.1rem; }
+  }
+}
+
+.drawer-tabs { display: flex; border-bottom: 1px solid #f0ede4; background: #fafaf8; flex-shrink: 0;
+  .dtab { flex: 1; padding: 0.875rem; background: none; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s;
+    &:hover { color: #555; background: #f5f3ef; }
+    &.active { color: #0d0d0d; font-weight: 600; border-bottom-color: #f5c842; background: #fff; }
+  }
+}
+
+.drawer-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.drawer-loading { display: flex; align-items: center; gap: 0.75rem; padding: 2rem; color: #888; justify-content: center; }
+.spinner { width: 20px; height: 20px; border: 2px solid #e0e0e0; border-top-color: #f5c842; border-radius: 50%; animation: spin 0.7s linear infinite; }
+.spin-sm { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 0.35rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.alert-success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.82rem; }
+.alert-error   { background: #fff5f5; border: 1px solid #fca5a5; color: #991b1b; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.82rem; }
+
+.profile-view { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.view-hero { display: flex; align-items: center; gap: 1rem; padding: 1.25rem; background: #fafaf8; border-radius: 14px; border: 1px solid #f0ede4;
+  .view-avatar { width: 56px; height: 56px; border-radius: 50%; background: #0d0d0d; color: #f5c842; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .view-hero-info { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #0d0d0d; margin: 0; width: 100%; } }
+}
+.role-chip  { font-size: 0.68rem; font-weight: 700; background: rgba(245,200,66,0.15); color: #b08800; padding: 0.2rem 0.55rem; border-radius: 20px; }
+.info-chip  { font-size: 0.72rem; color: #888; background: #f0ede4; padding: 0.2rem 0.55rem; border-radius: 20px; }
+.section-label { font-size: 0.68rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; }
+.view-bio { background: #fafaf8; border-radius: 12px; padding: 1rem; border: 1px solid #f0ede4; p { font-size: 0.875rem; color: #555; line-height: 1.6; margin: 0.4rem 0 0; } }
+.view-fields { display: flex; flex-direction: column; gap: 0; border: 1px solid #f0ede4; border-radius: 12px; overflow: hidden; }
+.view-row { display: flex; align-items: center; padding: 0.7rem 1rem; border-bottom: 1px solid #f7f5f0;
+  &:last-child { border-bottom: none; }
+  .vr-label { font-size: 0.75rem; font-weight: 600; color: #aaa; width: 110px; flex-shrink: 0; }
+  .vr-val { font-size: 0.875rem; color: #333; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+.view-social { display: flex; flex-direction: column; gap: 0.5rem; }
+.social-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.schip { font-size: 0.78rem; font-weight: 600; padding: 0.35rem 0.875rem; border-radius: 20px; text-decoration: none; transition: all 0.15s;
+  &.linkedin { background: #e8f0fb; color: #1a73e8; &:hover { background: #d2e3fc; } }
+  &.github   { background: #f0f0f0; color: #333; &:hover { background: #e0e0e0; } }
+  &.twitter  { background: #e8f4fd; color: #1da1f2; &:hover { background: #d0ebfc; } }
+  &.website  { background: #fff8e1; color: #b08800; &:hover { background: #fff0c0; } }
+}
+.btn-edit-profile { padding: 0.7rem 1.5rem; background: #0d0d0d; color: #f5c842; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.18s; align-self: flex-start;
+  &:hover { background: #1a1a1a; }
+}
+
+.edit-form { display: flex; flex-direction: column; gap: 0.875rem; }
+.form-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.3rem;
+  label { font-size: 0.72rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+  input, select, textarea { padding: 0.6rem 0.875rem; border: 1.5px solid #ece9e0; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; color: #0d0d0d; background: #fff; outline: none; transition: border-color 0.15s;
+    &:focus { border-color: #f5c842; }
+    &.inp-disabled { background: #fafaf8; color: #bbb; cursor: not-allowed; }
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  .ferr  { font-size: 0.72rem; color: #e74c3c; }
+  .fhint { font-size: 0.72rem; color: #bbb; }
+}
+.section-divider { font-size: 0.68rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.25rem 0; border-top: 1px solid #f0ede4; margin-top: 0.25rem; }
+.form-actions { display: flex; gap: 0.75rem; margin-top: 0.25rem;
+  .btn-cancel { flex: 1; padding: 0.65rem; background: #fafaf8; border: 1.5px solid #ece9e0; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; cursor: pointer; &:hover { background: #f0ede4; } }
+  .btn-save   { flex: 2; padding: 0.65rem; background: #0d0d0d; color: #f5c842; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+    &:hover:not(:disabled) { background: #1a1a1a; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+.security-section { display: flex; flex-direction: column; gap: 1.25rem; }
+.sec-desc { font-size: 0.82rem; color: #888; margin: 0 0 0.75rem; }
+.account-info { background: #fafaf8; border-radius: 12px; padding: 1rem; border: 1px solid #f0ede4; margin-top: 0.5rem; }
