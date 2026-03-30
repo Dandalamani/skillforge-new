@@ -1,8 +1,10 @@
+const { publishQuiz, unpublishQuiz, deleteQuiz } = require('./quiz.publish');
 const { validationResult } = require('express-validator');
 const Quiz = require('../models/Quiz');
 const Question = require('../models/Question');
 const QuizAttempt = require('../models/QuizAttempt');
 const Course = require('../models/Course');
+const { updateQuiz } = require('./quiz.update');
 
 // ── Groq free-tier limits ──────────────────────────────────────────────────
 // Free tier: 6000 requests/day, 30 req/min
@@ -61,16 +63,28 @@ const getAiUsage = (req, res) => {
 };
 
 // GET /api/quizzes
+// GET /api/quizzes
 const getQuizzes = async (req, res) => {
   try {
-    const where = req.query.course_id ? { course_id: req.query.course_id } : {};
+    const where = {};
+    if (req.query.course_id) where.course_id = req.query.course_id;
+
+    // Students only see PUBLISHED quizzes
+    if (req.user.role === 'STUDENT') {
+      where.status = 'PUBLISHED';
+    }
+
     const quizzes = await Quiz.findAll({
       where,
-      include: [{ model: Course, as: 'course', attributes: ['id', 'title'] }],
+      include: [
+        { model: Course, as: 'course', attributes: ['id', 'title'] },
+        { model: Question, as: 'questions' },
+      ],
       order: [['createdAt', 'DESC']],
     });
     return res.status(200).json({ quizzes });
   } catch (error) {
+    console.error('getQuizzes error:', error);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };
@@ -316,4 +330,4 @@ const submitQuizAttempt = async (req, res) => {
   }
 };
 
-module.exports = { getQuizzes, getQuizById, createQuiz, generateAIQuiz, submitQuizAttempt, getAiUsage };
+module.exports = { getQuizzes, getQuizById, createQuiz, generateAIQuiz, submitQuizAttempt, getAiUsage,publishQuiz, unpublishQuiz, deleteQuiz, updateQuiz};

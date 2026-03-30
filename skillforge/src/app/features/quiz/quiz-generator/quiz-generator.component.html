@@ -3,7 +3,7 @@
         <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
         <nav class="sidebar-nav">
             <a class="nav-item" (click)="navigate('/dashboard/instructor')"><span>🏠</span> Overview</a>
-            <a class="nav-item" (click)="navigate('/courses')"><span>📘</span> My Courses</a>
+            <a class="nav-item" (click)="navigate('/courses')"><span>📚</span> My Courses</a>
             <a class="nav-item active"><span>🤖</span> AI Quiz Generator</a>
             <a class="nav-item" (click)="navigate('/students')"><span>👥</span> Students</a>
             <a class="nav-item" (click)="navigate('/analytics')"><span>📊</span> Analytics</a>
@@ -14,109 +14,80 @@
     <main class="main">
         <header class="topbar">
             <div>
-                <h1>AI Quiz Generator</h1>
-                <p>Generate smart quizzes instantly using Groq AI</p>
+                <h1>Quiz Generator</h1>
+                <p>Generate with AI or create manually</p>
             </div>
+            <!-- Mode toggle -->
+            <div class="mode-toggle">
+                <button class="mode-btn" [class.active]="mode() === 'ai'" (click)="setMode('ai')">🤖 AI Generate</button>
+                <button class="mode-btn" [class.active]="mode() === 'manual'" (click)="setMode('manual')">✏ Manual Create</button>
+            </div>
+            @if (mode() === 'ai') {
             @if (usage()) {
             <div class="usage-meter-compact" [class.warn]="usage()!.warning" [class.danger]="usage()!.percent >= 90">
-                <div class="um-label">
-                    <span>🤖 Daily AI Quota</span>
-                    <span class="um-count">{{ usage()!.used }} / {{ usage()!.limit }}</span>
-                </div>
-                <div class="um-bar-track">
-                    <div class="um-bar-fill" [style.width.%]="usage()!.percent" [style.background]="getUsageBarColor()"></div>
-                </div>
+                <div class="um-label"><span>🤖 Daily AI Quota</span><span class="um-count">{{ usage()!.used }} / {{ usage()!.limit }}</span></div>
+                <div class="um-bar-track"><div class="um-bar-fill" [style.width.%]="usage()!.percent" [style.background]="getUsageBarColor()"></div></div>
                 <div class="um-pct">{{ usage()!.percent }}% used today</div>
             </div>
-            } @else {
-            <div class="usage-skeleton"></div>
+            } @else { <div class="usage-skeleton"></div> }
             }
         </header>
 
-        @if (showUsageWarning() && usage()) {
+        @if (mode() === 'ai' && showUsageWarning() && usage()) {
         <div class="warning-banner" [class.exhausted-banner]="usage()!.exhausted">
             <div class="wb-icon">{{ usage()!.exhausted ? '🚫' : '⚠️' }}</div>
             <div class="wb-content">
-                @if (usage()!.exhausted) {
-                <strong>Daily AI quota exhausted!</strong>
-                <span>You've used all {{ usage()!.limit }} free requests for today. Resets at midnight.</span>
-                } @else {
-                <strong>Approaching daily limit!</strong>
-                <span>
-              {{ usage()!.used }} of {{ usage()!.limit }} requests used ({{ usage()!.percent }}%).
-              Use requests wisely.
-            </span>
-                }
+                @if (usage()!.exhausted) { <strong>Daily AI quota exhausted!</strong><span>Resets at midnight.</span> }
+                @else { <strong>Approaching daily limit!</strong><span>{{ usage()!.used }} of {{ usage()!.limit }} used.</span> }
             </div>
             <button class="wb-close" (click)="dismissWarning()">✕</button>
         </div>
         }
 
+        <!-- ══ AI MODE ══ -->
+        @if (mode() === 'ai') {
         <div class="gen-layout">
-            <!-- LEFT: Form -->
             <section class="gen-card">
                 <div class="gen-card-head">
                     <div class="gen-title"><span>🤖</span> Generate Quiz</div>
                     <span class="powered-badge">Powered by Groq</span>
                 </div>
-
-                @if (errorMessage()) {
-                <div class="alert-error">⚠ {{ errorMessage() }}</div>
-                }
-                @if (successMessage()) {
-                <div class="alert-success">✓ {{ successMessage() }}</div>
-                }
-
+                @if (errorMessage()) { <div class="alert-error">⚠ {{ errorMessage() }}</div> }
+                @if (successMessage()) { <div class="alert-success">✓ {{ successMessage() }}</div> }
                 <form [formGroup]="form" (ngSubmit)="generate()">
                     <div class="field">
                         <label>TOPIC <span class="req">*</span></label>
-                        <input type="text" formControlName="topic"
-                               placeholder="e.g. Python lists, World War II, Algebra" />
-                        @if (form.controls.topic.invalid && form.controls.topic.touched) {
-                        <span class="field-error">Topic must be at least 3 characters</span>
-                        }
+                        <input type="text" formControlName="topic" placeholder="e.g. Python lists, World War II" />
+                        @if (form.controls.topic.invalid && form.controls.topic.touched) { <span class="field-error">Topic must be at least 3 characters</span> }
                     </div>
-
                     <div class="field">
                         <label>SELECT COURSE <span class="req">*</span></label>
-                        @if (isLoadingCourses()) {
-                        <div class="select-skeleton"></div>
-                        } @else {
+                        @if (isLoadingCourses()) { <div class="select-skeleton"></div> }
+                        @else {
                         <select formControlName="course_id">
                             <option value="">— Select a course —</option>
-                            @for (c of courses(); track c.id) {
-                            <option [value]="c.id">{{ c.title }}</option>
-                            }
+                            @for (c of courses(); track c.id) { <option [value]="c.id">{{ c.title }}</option> }
                         </select>
-                        @if (form.controls.course_id.invalid && form.controls.course_id.touched) {
-                        <span class="field-error">Please select a course</span>
-                        }
+                        @if (form.controls.course_id.invalid && form.controls.course_id.touched) { <span class="field-error">Please select a course</span> }
                         }
                     </div>
-
                     <div class="field-row">
                         <div class="field">
                             <label>NUMBER OF QUESTIONS</label>
                             <select formControlName="num_questions">
-                                @for (n of questionCounts; track n) {
-                                <option [value]="n">{{ n }} questions</option>
-                                }
+                                @for (n of questionCounts; track n) { <option [value]="n">{{ n }} questions</option> }
                             </select>
                         </div>
                         <div class="field">
                             <label>DIFFICULTY</label>
                             <select formControlName="difficulty">
-                                @for (d of difficulties; track d) {
-                                <option [value]="d">{{ d }}</option>
-                                }
+                                @for (d of difficulties; track d) { <option [value]="d">{{ d }}</option> }
                             </select>
                         </div>
                     </div>
-
                     @if (usage() && usage()!.warning && !usage()!.exhausted) {
                     <div class="inline-warn">⚠ Only {{ usage()!.limit - usage()!.used }} requests remaining today.</div>
                     }
-
                     <button type="submit" class="btn-generate" [disabled]="isGenerating() || usage()?.exhausted">
                         @if (isGenerating()) { <span class="btn-spinner"></span> Generating... }
                         @else if (usage()?.exhausted) { 🚫 Quota Exhausted }
@@ -125,31 +96,40 @@
                 </form>
             </section>
 
-            <!-- RIGHT: Preview -->
             <section class="preview-card">
                 <div class="preview-head"><span>📋</span> Preview</div>
                 @if (!generatedQuiz()) {
-                <div class="preview-empty">
-                    <div class="preview-robot">🤖</div>
-                    <p>Your generated quiz will appear here</p>
-                </div>
+                <div class="preview-empty"><div class="preview-robot">🤖</div><p>Your generated quiz will appear here</p></div>
                 }
                 @if (generatedQuiz()) {
+                <div class="quiz-actions-bar">
+                    <div class="quiz-status-wrap">
+                        <span class="quiz-status-badge" [class.published]="isPublished" [class.draft]="!isPublished">{{ isPublished ? '🟢 Published' : '⚪ Draft' }}</span>
+                        <span class="quiz-status-hint">{{ isPublished ? 'Students can attempt this quiz' : 'Not visible to students yet' }}</span>
+                    </div>
+                    <div class="quiz-action-btns">
+                        @if (!isPublished) {
+                        <button class="btn-publish" [disabled]="isPublishing()" (click)="publishQuiz()">@if (isPublishing()) { <span class="btn-spinner-sm"></span> Publishing... } @else { 🚀 Publish Quiz }</button>
+                        } @else {
+                        <button class="btn-unpublish" [disabled]="isUnpublishing()" (click)="unpublishQuiz()">@if (isUnpublishing()) { <span class="btn-spinner-sm"></span> } @else { ↩ Unpublish }</button>
+                        }
+                        <button class="btn-delete-quiz" [disabled]="isDeleting()" (click)="deleteQuiz()">@if (isDeleting()) { <span class="btn-spinner-sm"></span> } @else { 🗑 Delete }</button>
+                    </div>
+                </div>
+                @if (publishMessage()) {
+                <div class="publish-msg" [class.success]="publishMessage().startsWith('✓')" [class.warn]="!publishMessage().startsWith('✓')">{{ publishMessage() }}</div>
+                }
                 <div class="preview-quiz">
                     <div class="pq-title">{{ generatedQuiz()!.title }}</div>
                     <div class="pq-meta">{{ generatedQuiz()!.questions.length }} questions generated</div>
                     <div class="pq-questions">
                         @for (q of generatedQuiz()!.questions; track q.question_text; let i = $index) {
                         <div class="pq-question">
-                            <div class="pq-q-text"><span class="pq-num">Q{{ i + 1 }}</span> {{ q.question_text }}</div>
+                            <div class="pq-q-text"><span class="pq-num">Q{{ i+1 }}</span> {{ q.question_text }}</div>
                             <div class="pq-options">
-                                @for (opt of q.options; track opt) {
-                                <div class="pq-opt" [class.correct]="opt === q.correct_answer">{{ opt }}</div>
-                                }
+                                @for (opt of q.options; track opt) { <div class="pq-opt" [class.correct]="opt === q.correct_answer">{{ opt }}</div> }
                             </div>
-                            @if (q.explanation) {
-                            <div class="pq-explanation">💡 {{ q.explanation }}</div>
-                            }
+                            @if (q.explanation) { <div class="pq-explanation">💡 {{ q.explanation }}</div> }
                         </div>
                         }
                     </div>
@@ -157,5 +137,143 @@
                 }
             </section>
         </div>
+        }
+
+        <!-- ══ MANUAL MODE ══ -->
+        @if (mode() === 'manual') {
+        <div class="manual-wrap">
+
+            @if (!manualCreatedQuiz()) {
+            <form [formGroup]="manualForm" (ngSubmit)="createManualQuiz()" class="manual-form">
+
+                @if (manualError()) { <div class="alert-error">⚠ {{ manualError() }}</div> }
+
+                <!-- Quiz Meta -->
+                <div class="manual-meta-card">
+                    <h3 class="section-title">📝 Quiz Details</h3>
+                    <div class="meta-grid">
+                        <div class="mfield full">
+                            <label>QUIZ TITLE <span class="req">*</span></label>
+                            <input type="text" formControlName="title" placeholder="e.g. Python Basics Quiz" />
+                            @if (manualForm.controls.title.invalid && manualForm.controls.title.touched) { <span class="field-error">Title is required</span> }
+                        </div>
+                        <div class="mfield">
+                            <label>SELECT COURSE <span class="req">*</span></label>
+                            @if (isLoadingCourses()) { <div class="select-skeleton"></div> }
+                            @else {
+                            <select formControlName="course_id">
+                                <option value="">— Select a course —</option>
+                                @for (c of courses(); track c.id) { <option [value]="c.id">{{ c.title }}</option> }
+                            </select>
+                            @if (manualForm.controls.course_id.invalid && manualForm.controls.course_id.touched) { <span class="field-error">Please select a course</span> }
+                            }
+                        </div>
+                        <div class="mfield">
+                            <label>DIFFICULTY</label>
+                            <select formControlName="difficulty">
+                                @for (d of difficulties; track d) { <option [value]="d">{{ d }}</option> }
+                            </select>
+                        </div>
+                        <div class="mfield">
+                            <label>TIME LIMIT (minutes)</label>
+                            <input type="number" formControlName="time_limit_minutes" min="1" placeholder="30" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions -->
+                <div class="questions-section">
+                    <div class="qs-header">
+                        <h3 class="section-title">❓ Questions <span class="q-count">{{ questionsArray.length }}</span></h3>
+                        <button type="button" class="btn-add-q" (click)="addQuestion()">+ Add Question</button>
+                    </div>
+
+                    <div formArrayName="questions" class="questions-list">
+                        @for (q of questionsArray.controls; track $index; let qi = $index) {
+                        <div class="q-card" [formGroupName]="qi">
+                            <div class="q-card-header">
+                                <span class="qnum">Q{{ qi + 1 }}</span>
+                                <div class="q-title-wrap">
+                                    <textarea formControlName="question_text" rows="2" placeholder="Enter your question here..." class="q-textarea"></textarea>
+                                    @if (isQTextInvalid(qi)) { <span class="field-error">Question text is required</span> }
+                                </div>
+                                @if (questionsArray.length > 1) {
+                                <button type="button" class="btn-remove-q" (click)="removeQuestion(qi)" title="Remove question">✕</button>
+                                }
+                            </div>
+
+                            <div class="options-label">OPTIONS — click ✓ to mark the correct answer</div>
+                            <div class="options-grid" formArrayName="options">
+                                @for (opt of getOptionsArray(qi).controls; track $index; let oi = $index) {
+                                <div class="opt-row" [class.is-correct]="isCorrectAnswer(qi, getOptionControl(qi, oi).value)">
+                                    <span class="opt-letter">{{ ['A','B','C','D'][oi] }}</span>
+                                    <input type="text" [formControl]="getOptionControl(qi, oi)" placeholder="Option {{ ['A','B','C','D'][oi] }}" class="opt-input" />
+                                    <button type="button" class="btn-mark-correct"
+                                            [class.is-correct]="isCorrectAnswer(qi, getOptionControl(qi, oi).value)"
+                                            (click)="setCorrectAnswer(qi, getOptionControl(qi, oi).value)"
+                                            title="Mark as correct answer">
+                                        {{ isCorrectAnswer(qi, getOptionControl(qi, oi).value) ? '✓' : '○' }}
+                                    </button>
+                                </div>
+                                }
+                            </div>
+                            @if (isCorrectAnswerInvalid(qi)) {
+                            <span class="field-error" style="margin-top:.25rem;display:block">Please select the correct answer</span>
+                            }
+
+                            <div class="mfield" style="margin-top:.875rem">
+                                <label>💡 EXPLANATION (optional)</label>
+                                <input type="text" formControlName="explanation" placeholder="Why is this the correct answer?" />
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                    <button type="button" class="btn-add-q-bottom" (click)="addQuestion()">+ Add Another Question</button>
+                </div>
+
+                <!-- Submit -->
+                <div class="manual-footer">
+                    <span class="footer-hint">{{ questionsArray.length }} question{{ questionsArray.length !== 1 ? 's' : '' }} added</span>
+                    <button type="submit" class="btn-create-quiz" [disabled]="isCreatingManual()">
+                        @if (isCreatingManual()) { <span class="btn-spinner"></span> Creating... }
+                        @else { ✓ Create Quiz }
+                    </button>
+                </div>
+            </form>
+            }
+
+            <!-- Created — show publish options -->
+            @if (manualCreatedQuiz()) {
+            <div class="manual-success-card">
+                <div class="msc-icon">🎉</div>
+                <h3>Quiz Created Successfully!</h3>
+                <p class="msc-title">{{ manualQuizTitle}}</p>
+                @if (manualSuccess()) { <div class="alert-success" style="margin:.75rem 0">{{ manualSuccess() }}</div> }
+
+                <div class="msc-status">
+              <span class="quiz-status-badge"
+                    [class.published]="manualQuizPublished"
+                    [class.draft]="!manualQuizPublished">
+  {{ manualQuizPublished ? '🟢 Published' : '⚪ Draft' }}
+</span>
+                </div>
+
+                <div class="msc-actions">
+                    @if (!manualQuizPublished) {
+                    <button class="btn-publish" [disabled]="isPublishingManual()" (click)="publishManualQuiz()">
+                        @if (isPublishingManual()) { <span class="btn-spinner-sm"></span> Publishing... } @else { 🚀 Publish Now }
+                    </button>
+                    } @else {
+                    <span class="published-note">✓ Students can now attempt this quiz</span>
+                    }
+                    <button class="btn-create-another" (click)="resetManualForm()">+ Create Another Quiz</button>
+                    <button class="btn-goto-quizzes" (click)="navigate('/courses')">📚 View in My Courses</button>
+                </div>
+            </div>
+            }
+        </div>
+        }
+
     </main>
 </div>

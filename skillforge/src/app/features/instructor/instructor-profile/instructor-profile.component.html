@@ -16,51 +16,28 @@
         <button class="drawer-close" (click)="close()">✕</button>
     </div>
 
-    <!-- Instructor Stats Bar -->
     @if (stats()) {
     <div class="stats-bar">
-        <div class="sbar-item">
-            <div class="sbar-val">{{ stats()!.totalCourses }}</div>
-            <div class="sbar-label">Courses</div>
-        </div>
-        <div class="sbar-item">
-            <div class="sbar-val">{{ stats()!.publishedCourses }}</div>
-            <div class="sbar-label">Published</div>
-        </div>
-        <div class="sbar-item">
-            <div class="sbar-val">{{ stats()!.totalStudents }}</div>
-            <div class="sbar-label">Students</div>
-        </div>
-        <div class="sbar-item">
-            <div class="sbar-val">{{ stats()!.aiQuizzes }}</div>
-            <div class="sbar-label">AI Quizzes</div>
-        </div>
+        <div class="sbar-item"><div class="sbar-val">{{ stats()!.totalCourses }}</div><div class="sbar-label">Courses</div></div>
+        <div class="sbar-item"><div class="sbar-val">{{ stats()!.publishedCourses }}</div><div class="sbar-label">Published</div></div>
+        <div class="sbar-item"><div class="sbar-val">{{ stats()!.totalStudents }}</div><div class="sbar-label">Students</div></div>
+        <div class="sbar-item"><div class="sbar-val">{{ stats()!.aiQuizzes }}</div><div class="sbar-label">AI Quizzes</div></div>
     </div>
     }
 
-    <!-- Tabs -->
     <div class="drawer-tabs">
         <button class="dtab" [class.active]="activeTab() === 'profile'" (click)="activeTab.set('profile')">👤 Profile</button>
         <button class="dtab" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">🔒 Security</button>
     </div>
 
-    <!-- Body -->
     <div class="drawer-body">
-
-        @if (isLoading()) {
-        <div class="drawer-loading"><div class="spinner"></div><p>Loading...</p></div>
-        }
-
+        @if (isLoading()) { <div class="drawer-loading"><div class="spinner"></div><p>Loading...</p></div> }
         @if (saveSuccess()) { <div class="alert-success">✓ {{ saveSuccess() }}</div> }
         @if (saveError())   { <div class="alert-error">⚠ {{ saveError() }}</div> }
 
-        <!-- PROFILE TAB -->
         @if (!isLoading() && activeTab() === 'profile') {
-
         @if (!isEditing()) {
         <div class="profile-view">
-
-            <!-- Hero card -->
             <div class="view-hero">
                 <div class="view-avatar">{{ initials }}</div>
                 <div class="view-hero-info">
@@ -70,74 +47,42 @@
                     <span class="info-chip">📅 Since {{ memberSince }}</span>
                 </div>
             </div>
-
             @if (profile()?.bio) {
-            <div class="view-bio">
-                <div class="section-label">About Me</div>
-                <p>{{ profile()!.bio }}</p>
-            </div>
+            <div class="view-bio"><div class="section-label">About Me</div><p>{{ profile()!.bio }}</p></div>
             }
-
             <div class="view-fields">
-                <div class="view-row">
-                    <span class="vr-label">Email</span>
-                    <span class="vr-val">{{ profile()?.email }}</span>
-                </div>
-                <div class="view-row">
-                    <span class="vr-label">Date of Birth</span>
-                    <span class="vr-val">{{ profile()?.dob ? (profile()!.dob | date:'MMM d, y') : '—' }}</span>
-                </div>
-                <div class="view-row">
-                    <span class="vr-label">Gender</span>
-                    <span class="vr-val">{{ profile()?.gender || '—' }}</span>
-                </div>
-                <div class="view-row">
-                    <span class="vr-label">Location</span>
-                    <span class="vr-val">{{ profile()?.location || '—' }}</span>
-                </div>
+                <div class="view-row"><span class="vr-label">Email</span><span class="vr-val">{{ profile()?.email }}</span></div>
+                <div class="view-row"><span class="vr-label">Date of Birth</span><span class="vr-val">{{ profile()?.dob ? (profile()!.dob | date:'MMM d, y') : '—' }}</span></div>
+                <div class="view-row"><span class="vr-label">Gender</span><span class="vr-val">{{ profile()?.gender || '—' }}</span></div>
+                <div class="view-row"><span class="vr-label">Location</span><span class="vr-val">{{ profile()?.location || '—' }}</span></div>
             </div>
-
             @if (profile()?.linkedin || profile()?.github || profile()?.twitter || profile()?.website) {
             <div class="view-social">
                 <div class="section-label">Social &amp; Links</div>
                 <div class="social-chips">
-                    @if (profile()?.linkedin) {
-                    <a [href]="profile()!.linkedin" target="_blank" class="schip linkedin">in LinkedIn</a>
-                    }
-                    @if (profile()?.github) {
-                    <a [href]="profile()!.github" target="_blank" class="schip github">⌥ GitHub</a>
-                    }
-                    @if (profile()?.twitter) {
-                    <a [href]="profile()!.twitter" target="_blank" class="schip twitter">𝕏 Twitter</a>
-                    }
-                    @if (profile()?.website) {
-                    <a [href]="profile()!.website" target="_blank" class="schip website">🌐 Website</a>
-                    }
+                    @if (profile()?.linkedin) { <a [href]="profile()!.linkedin" target="_blank" class="schip linkedin">in LinkedIn</a> }
+                    @if (profile()?.github)   { <a [href]="profile()!.github"   target="_blank" class="schip github">⌥ GitHub</a> }
+                    @if (profile()?.twitter)  { <a [href]="profile()!.twitter"  target="_blank" class="schip twitter">𝕏 Twitter</a> }
+                    @if (profile()?.website)  { <a [href]="profile()!.website"  target="_blank" class="schip website">🌐 Website</a> }
                 </div>
             </div>
             }
-
             <button class="btn-edit-profile" (click)="startEdit()">✏ Edit Profile</button>
         </div>
         }
 
         @if (isEditing()) {
         <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="edit-form">
-
             <div class="form-group">
                 <label>Full Name *</label>
                 <input type="text" formControlName="name" placeholder="Your full name" />
-                @if (profileForm.controls.name.invalid && profileForm.controls.name.touched) {
-                <span class="ferr">Min 2 characters</span>
-                }
+                @if (profileForm.controls.name.invalid && profileForm.controls.name.touched) { <span class="ferr">Min 2 characters</span> }
             </div>
-
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" [value]="profile()?.email" disabled class="inp-disabled" />
                 <span class="fhint">Email cannot be changed</span>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label>Date of Birth</label>
@@ -154,36 +99,19 @@
                     </select>
                 </div>
             </div>
-
             <div class="form-group">
                 <label>Location</label>
                 <input type="text" formControlName="location" placeholder="e.g. Hyderabad, India" />
             </div>
-
             <div class="form-group">
                 <label>Bio / About Me</label>
                 <textarea formControlName="bio" rows="3" placeholder="Describe your teaching experience..."></textarea>
             </div>
-
             <div class="section-divider">Social &amp; Links</div>
-
-            <div class="form-group">
-                <label>🔗 LinkedIn</label>
-                <input type="url" formControlName="linkedin" placeholder="https://linkedin.com/in/..." />
-            </div>
-            <div class="form-group">
-                <label>⌥ GitHub</label>
-                <input type="url" formControlName="github" placeholder="https://github.com/..." />
-            </div>
-            <div class="form-group">
-                <label>𝕏 Twitter / X</label>
-                <input type="url" formControlName="twitter" placeholder="https://twitter.com/..." />
-            </div>
-            <div class="form-group">
-                <label>🌐 Website / Portfolio</label>
-                <input type="url" formControlName="website" placeholder="https://yoursite.com" />
-            </div>
-
+            <div class="form-group"><label>🔗 LinkedIn</label><input type="url" formControlName="linkedin" placeholder="https://linkedin.com/in/..." /></div>
+            <div class="form-group"><label>⌥ GitHub</label><input type="url" formControlName="github" placeholder="https://github.com/..." /></div>
+            <div class="form-group"><label>𝕏 Twitter / X</label><input type="url" formControlName="twitter" placeholder="https://twitter.com/..." /></div>
+            <div class="form-group"><label>🌐 Website / Portfolio</label><input type="url" formControlName="website" placeholder="https://yoursite.com" /></div>
             <div class="form-actions">
                 <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
                 <button type="submit" class="btn-save" [disabled]="isSaving()">
@@ -194,29 +122,22 @@
         }
         }
 
-        <!-- SECURITY TAB -->
         @if (!isLoading() && activeTab() === 'security') {
         <div class="security-section">
             <div class="section-label" style="margin-bottom:.5rem">Change Password</div>
             <p class="sec-desc">Keep your account secure with a strong password.</p>
-
             @if (pwSuccess()) { <div class="alert-success">✓ {{ pwSuccess() }}</div> }
             @if (pwError())   { <div class="alert-error">⚠ {{ pwError() }}</div> }
-
-            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="edit-form">
+            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="pw-form">
                 <div class="form-group">
                     <label>Current Password</label>
                     <input type="password" formControlName="currentPassword" placeholder="Enter current password" />
-                    @if (passwordForm.controls.currentPassword.invalid && passwordForm.controls.currentPassword.touched) {
-                    <span class="ferr">Required</span>
-                    }
+                    @if (passwordForm.controls.currentPassword.invalid && passwordForm.controls.currentPassword.touched) { <span class="ferr">Required</span> }
                 </div>
                 <div class="form-group">
                     <label>New Password</label>
                     <input type="password" formControlName="newPassword" placeholder="Min 6 characters" />
-                    @if (passwordForm.controls.newPassword.invalid && passwordForm.controls.newPassword.touched) {
-                    <span class="ferr">Min 6 characters</span>
-                    }
+                    @if (passwordForm.controls.newPassword.invalid && passwordForm.controls.newPassword.touched) { <span class="ferr">Min 6 characters</span> }
                 </div>
                 <div class="form-group">
                     <label>Confirm New Password</label>
@@ -226,7 +147,6 @@
                     @if (isChangingPassword()) { <span class="spin-sm"></span> Updating... } @else { 🔒 Update Password }
                 </button>
             </form>
-
             <div class="account-info">
                 <div class="section-label" style="margin-bottom:.5rem">Account Info</div>
                 <div class="view-row"><span class="vr-label">Role</span><span class="vr-val">{{ profile()?.role }}</span></div>
@@ -235,6 +155,5 @@
             </div>
         </div>
         }
-
     </div>
 </div>

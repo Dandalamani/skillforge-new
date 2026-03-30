@@ -1,9 +1,6 @@
 <div class="dashboard">
     <aside class="sidebar">
-        <div class="sidebar-brand">
-            <div class="logo-mark">SF</div>
-            <span>SkillForge</span>
-        </div>
+        <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
         <nav class="sidebar-nav">
             <a class="nav-item" (click)="navigate('/dashboard/instructor')"><span>🏠</span> Overview</a>
             <a class="nav-item" (click)="navigate('/courses')"><span>📚</span> My Courses</a>
@@ -23,18 +20,13 @@
         </header>
 
         @if (isLoading()) {
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Loading analytics...</p>
-        </div>
+        <div class="loading-state"><div class="spinner"></div><p>Loading analytics...</p></div>
         }
-
-        @if (errorMessage()) {
-        <div class="alert-error">⚠ {{ errorMessage() }}</div>
-        }
+        @if (errorMessage()) { <div class="alert-error">⚠ {{ errorMessage() }}</div> }
 
         @if (!isLoading() && analytics()) {
-        <!-- Stats -->
+
+        <!-- KPI Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">📘</div>
@@ -63,40 +55,78 @@
             <div class="stat-card">
                 <div class="stat-icon">✅</div>
                 <div class="stat-body">
-                    <div class="stat-value">
-                        {{ analytics()!.overallPassRate !== null ? analytics()!.overallPassRate + '%' : '—' }}
-                    </div>
+                    <div class="stat-value">{{ analytics()!.overallPassRate !== null ? analytics()!.overallPassRate + '%' : '—' }}</div>
                     <div class="stat-label">Avg. Pass Rate</div>
-                    <div class="stat-sub">
-                        avg score: {{ analytics()!.overallAvgScore !== null ? analytics()!.overallAvgScore + '%' : '—' }}
-                    </div>
+                    <div class="stat-sub">avg score: {{ analytics()!.overallAvgScore !== null ? analytics()!.overallAvgScore + '%' : '—' }}</div>
                 </div>
             </div>
         </div>
 
-        <!-- Course Performance -->
-        <section class="card">
-            <div class="card-head">
-                <h2>Course Performance</h2>
-                <span class="pill">{{ analytics()!.courseStats.length }} courses</span>
+        @if (analytics()!.courseStats.length === 0) {
+        <div class="empty-full">
+            <div class="empty-icon">📊</div>
+            <p>No course data yet. Create courses and generate quizzes to see analytics.</p>
+        </div>
+        }
+
+        @if (analytics()!.courseStats.length > 0) {
+
+        <!-- Row 1: Bar chart + Doughnut -->
+        <div class="charts-row">
+            <div class="chart-card wide">
+                <div class="chart-header">
+                    <div>
+                        <h3>Avg Score &amp; Attempts per Course</h3>
+                        <p>Bars = average score · Line = total attempts</p>
+                    </div>
+                    <span class="chart-badge bar">Bar + Line</span>
+                </div>
+                <div class="chart-wrap">
+                    <canvas #barCanvas></canvas>
+                </div>
             </div>
 
-            @if (analytics()!.courseStats.length === 0) {
-            <div class="empty-state">
-                <div class="empty-icon">📊</div>
-                <p>No course data yet. Create courses and generate quizzes to see analytics.</p>
+            <div class="chart-card narrow">
+                <div class="chart-header">
+                    <div>
+                        <h3>Course Status</h3>
+                        <p>Published vs draft courses</p>
+                    </div>
+                    <span class="chart-badge donut">Donut</span>
+                </div>
+                <div class="chart-wrap donut-wrap">
+                    <canvas #doughnutCanvas></canvas>
+                </div>
+                <div class="donut-center">
+                    <div class="dc-val">{{ analytics()!.totalCourses }}</div>
+                    <div class="dc-label">Courses</div>
+                </div>
             </div>
-            } @else {
+        </div>
+
+        <!-- Row 2: Horizontal bar (pass rate) -->
+        <div class="chart-card full">
+            <div class="chart-header">
+                <div>
+                    <h3>Pass Rate by Course</h3>
+                    <p>Percentage of students who passed quizzes in each course</p>
+                </div>
+                <span class="chart-badge hbar">Horizontal Bar</span>
+            </div>
+            <div class="chart-wrap">
+                <canvas #passRateCanvas></canvas>
+            </div>
+        </div>
+
+        <!-- Course Performance Table -->
+        <section class="card">
+            <div class="card-head">
+                <h2>Course Performance Table</h2>
+                <span class="pill">{{ analytics()!.courseStats.length }} courses</span>
+            </div>
             <table class="analytics-table">
                 <thead>
-                <tr>
-                    <th>Course</th>
-                    <th>Quizzes</th>
-                    <th>Attempts</th>
-                    <th>Pass Rate</th>
-                    <th>Avg. Score</th>
-                    <th>Performance</th>
-                </tr>
+                <tr><th>Course</th><th>Quizzes</th><th>Attempts</th><th>Pass Rate</th><th>Avg. Score</th><th>Performance</th></tr>
                 </thead>
                 <tbody>
                 @for (course of analytics()!.courseStats; track course.courseId) {
@@ -106,45 +136,24 @@
                     <td>{{ course.attempts }}</td>
                     <td>
                         @if (course.passRate !== null) {
-                        <span class="score-badge" [class]="getScoreClass(course.passRate)">
-                        {{ course.passRate }}%
-                      </span>
-                        } @else {
-                        <span class="muted">—</span>
-                        }
+                        <span class="score-badge" [class]="getScoreClass(course.passRate)">{{ course.passRate }}%</span>
+                        } @else { <span class="muted">—</span> }
+                    </td>
+                    <td>
+                        @if (course.avgScore !== null) { {{ course.avgScore }}% }
+                        @else { <span class="muted">No data</span> }
                     </td>
                     <td>
                         @if (course.avgScore !== null) {
-                        {{ course.avgScore }}%
-                        } @else {
-                        <span class="muted">No data</span>
-                        }
-                    </td>
-                    <td>
-                        @if (course.avgScore !== null) {
-                        <div class="progress-bar">
-                            <div class="progress-fill"
-                                 [style.width.%]="course.avgScore"
-                                 [class]="getScoreClass(course.avgScore)">
-                            </div>
-                        </div>
-                        } @else {
-                        <span class="muted">—</span>
-                        }
+                        <div class="progress-bar"><div class="progress-fill" [style.width.%]="course.avgScore" [class]="getScoreClass(course.avgScore)"></div></div>
+                        } @else { <span class="muted">—</span> }
                     </td>
                 </tr>
                 }
                 </tbody>
             </table>
-            }
         </section>
         }
-
-        @if (!isLoading() && !analytics() && !errorMessage()) {
-        <div class="empty-full">
-            <div class="empty-icon">📊</div>
-            <p>No analytics data available yet.</p>
-        </div>
         }
     </main>
 </div>

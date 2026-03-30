@@ -17,30 +17,6 @@
                 <h1>My Courses</h1>
                 <p>All available published courses</p>
             </div>
-            <div class="profile-wrap">
-                <button class="avatar-circle" (click)="toggleProfile()">{{ firstName()[0] | uppercase }}</button>
-                @if (showProfile()) {
-                <div class="profile-dropdown">
-                    <div class="pd-header">
-                        <div class="pd-avatar">{{ firstName()[0] | uppercase }}</div>
-                        <div class="pd-info">
-                            <div class="pd-name">{{ user()?.name }}</div>
-                            <div class="pd-email">{{ user()?.email }}</div>
-                            <span class="pd-role-badge">Student</span>
-                        </div>
-                    </div>
-                    <div class="pd-menu">
-                        <button class="pd-item" (click)="navigate('/student/courses')"><span class="pd-item-icon">📚</span><span>My Courses</span><span class="pd-arrow">›</span></button>
-                        <button class="pd-item" (click)="navigate('/student/quizzes')"><span class="pd-item-icon">📝</span><span>My Quizzes</span><span class="pd-arrow">›</span></button>
-                        <button class="pd-item" (click)="navigate('/student/progress')"><span class="pd-item-icon">📊</span><span>My Progress</span><span class="pd-arrow">›</span></button>
-                    </div>
-                    <div class="pd-footer">
-                        <span class="pd-since">Member since {{ memberSince() }}</span>
-                        <button class="pd-logout" (click)="logout()">↩ Sign out</button>
-                    </div>
-                </div>
-                }
-            </div>
         </div>
 
         @if (isLoading()) {

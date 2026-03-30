@@ -1,9 +1,6 @@
 <div class="dashboard">
     <aside class="sidebar">
-        <div class="sidebar-brand">
-            <div class="logo-mark">SF</div>
-            <span>SkillForge</span>
-        </div>
+        <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
         <nav class="sidebar-nav">
             <a class="nav-item" (click)="navigate('/dashboard/instructor')"><span>🏠</span> Overview</a>
             <a class="nav-item active"><span>📚</span> My Courses</a>
@@ -15,6 +12,8 @@
     </aside>
 
     <main class="main">
+        @if (!quizPanelCourse()) {
+        <!-- ══ COURSES LIST ══ -->
         <header class="topbar">
             <div>
                 <h1>My Courses</h1>
@@ -23,20 +22,9 @@
             <button class="btn-primary" (click)="createCourse()">+ New Course</button>
         </header>
 
-        @if (toastMessage()) {
-        <div class="toast">✓ {{ toastMessage() }}</div>
-        }
-
-        @if (errorMessage()) {
-        <div class="alert-error">⚠ {{ errorMessage() }}</div>
-        }
-
-        @if (isLoading()) {
-        <div class="loading-state">
-            <div class="spinner-lg"></div>
-            <p>Loading courses...</p>
-        </div>
-        }
+        @if (toastMessage()) { <div class="toast">✓ {{ toastMessage() }}</div> }
+        @if (errorMessage()) { <div class="alert-error">⚠ {{ errorMessage() }}</div> }
+        @if (isLoading()) { <div class="loading-state"><div class="spinner-lg"></div><p>Loading courses...</p></div> }
 
         @if (!isLoading() && courses().length === 0) {
         <div class="empty-state">
@@ -54,53 +42,176 @@
                 <div class="card-header">
                     <div class="course-icon">📘</div>
                     <div class="card-badges">
-                <span class="difficulty-badge" [class]="getDifficultyClass(course.difficulty_level)">
-                  {{ course.difficulty_level }}
-                </span>
-                        <span class="status-badge"
-                              [class.published]="course.status === 'PUBLISHED'"
-                              [class.draft]="course.status === 'DRAFT'">
-                  {{ course.status }}
-                </span>
+                        <span class="difficulty-badge" [class]="getDifficultyClass(course.difficulty_level)">{{ course.difficulty_level }}</span>
+                        <span class="status-badge" [class.published]="course.status === 'PUBLISHED'" [class.draft]="course.status === 'DRAFT'">{{ course.status }}</span>
                     </div>
                 </div>
-
                 <div class="card-body">
                     <h3 class="course-title">{{ course.title }}</h3>
                     <p class="course-desc">{{ course.description || 'No description provided.' }}</p>
                 </div>
-
-                <div class="card-meta">
-                    <span class="meta-item">🗓 {{ course.createdAt | date: 'MMM d, y' }}</span>
-                </div>
-
+                <div class="card-meta"><span class="meta-item">🗓 {{ course.createdAt | date:'MMM d, y' }}</span></div>
                 <div class="card-actions">
                     <button class="btn-action content" (click)="navigate('/courses/' + course.id + '/content')">📁 Content</button>
                     <button class="btn-action edit" (click)="editCourse(course.id)">✏️ Edit</button>
-                    <button class="btn-action"
-                            [class.publish]="course.status === 'DRAFT'"
-                            [class.unpublish]="course.status === 'PUBLISHED'"
-                            (click)="toggleStatus(course)">
+                    <button class="btn-action quiz-btn" (click)="openQuizPanel(course)">📝 My Quizzes</button>
+                    <button class="btn-action" [class.publish]="course.status === 'DRAFT'" [class.unpublish]="course.status === 'PUBLISHED'" (click)="toggleStatus(course)">
                         {{ course.status === 'PUBLISHED' ? '📤 Unpublish' : '🚀 Publish' }}
                     </button>
-                    <button class="btn-action delete" (click)="confirmDelete(course)">
-                        🗑 Delete
-                    </button>
+                    <button class="btn-action delete" (click)="confirmDelete(course)">🗑 Delete</button>
                 </div>
             </div>
             }
         </div>
         }
+        }
+
+        @if (quizPanelCourse() && !editingQuiz()) {
+        <!-- ══ QUIZ LIST ══ -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="back-btn" (click)="closeQuizPanel()">← Back</button>
+                <div>
+                    <h1>My Quizzes</h1>
+                    <p>{{ quizPanelCourse()!.title }}</p>
+                </div>
+            </div>
+            <button class="btn-primary" (click)="navigate('/quiz-generator')">🤖 Generate More</button>
+        </header>
+
+        @if (toastMessage()) { <div class="toast">✓ {{ toastMessage() }}</div> }
+
+        @if (isLoadingQuizzes()) {
+        <div class="loading-state"><div class="spinner-lg"></div><p>Loading quizzes...</p></div>
+        }
+
+        @if (!isLoadingQuizzes() && quizzes().length === 0) {
+        <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h3>No quizzes yet</h3>
+            <p>No quizzes have been generated for this course.</p>
+            <button class="btn-primary" (click)="navigate('/quiz-generator')">🤖 Generate Quiz with AI</button>
+        </div>
+        }
+
+        @if (!isLoadingQuizzes() && quizzes().length > 0) {
+        <div class="quiz-list">
+            @for (quiz of quizzes(); track quiz.id) {
+            <div class="quiz-card">
+                <div class="qc-body">
+                    <div class="qc-left">
+                        <div class="qc-title">{{ quiz.title }}</div>
+                        <div class="qc-meta">
+                            <span class="diff-chip" [class]="quiz.difficulty_level.toLowerCase()">{{ quiz.difficulty_level }}</span>
+                            <span class="qc-detail">⏱ {{ quiz.time_limit_minutes }} min</span>
+                            <span class="qc-detail">❓ {{ quiz.questions.length }} questions</span>
+                            @if (quiz.generated_by_ai) { <span class="ai-chip">🤖 AI</span> }
+                            <span class="qc-detail">🗓 {{ quiz.createdAt | date:'MMM d, y' }}</span>
+                        </div>
+                    </div>
+                    <div class="qc-right">
+                  <span class="status-chip" [class.published]="quiz.status === 'PUBLISHED'" [class.draft]="quiz.status !== 'PUBLISHED'">
+                    {{ quiz.status === 'PUBLISHED' ? '🟢 Published' : '⚪ Draft' }}
+                  </span>
+                    </div>
+                </div>
+                <div class="qc-actions">
+                    <button class="qbtn edit" (click)="startEditQuiz(quiz)">✏ Edit Quiz</button>
+                    @if (quiz.status !== 'PUBLISHED') {
+                    <button class="qbtn publish" [disabled]="isPublishingId() === quiz.id" (click)="publishQuiz(quiz)">
+                        @if (isPublishingId() === quiz.id) { <span class="spin-sm"></span> } @else { 🚀 Publish }
+                    </button>
+                    } @else {
+                    <button class="qbtn unpublish" [disabled]="isPublishingId() === quiz.id" (click)="unpublishQuiz(quiz)">
+                        @if (isPublishingId() === quiz.id) { <span class="spin-sm"></span> } @else { ↩ Unpublish }
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        }
+        }
+
+        @if (quizPanelCourse() && editingQuiz()) {
+        <!-- ══ EDIT QUIZ ══ -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="back-btn" (click)="cancelEdit()">← Back to Quizzes</button>
+                <div>
+                    <h1>Edit Quiz</h1>
+                    <p>{{ quizPanelCourse()!.title }}</p>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn-cancel-edit" (click)="cancelEdit()">Cancel</button>
+                <button class="btn-save-quiz" [disabled]="isSavingQuiz()" (click)="saveQuiz()">
+                    @if (isSavingQuiz()) { <span class="spin-sm"></span> Saving... } @else { ✓ Save Changes }
+                </button>
+            </div>
+        </header>
+
+        @if (quizSaveMsg()) { <div class="alert-success">{{ quizSaveMsg() }}</div> }
+        @if (quizSaveErr()) { <div class="alert-error">⚠ {{ quizSaveErr() }}</div> }
+
+        <form [formGroup]="editForm" (ngSubmit)="saveQuiz()" class="qedit-wrap">
+            <!-- Meta row -->
+            <div class="qedit-meta">
+                <div class="qe-field">
+                    <label>Quiz Title</label>
+                    <input type="text" formControlName="title" />
+                </div>
+                <div class="qe-field narrow">
+                    <label>Difficulty</label>
+                    <select formControlName="difficulty_level">
+                        @for (d of difficulties; track d) { <option [value]="d">{{ d }}</option> }
+                    </select>
+                </div>
+                <div class="qe-field narrow">
+                    <label>Time (min)</label>
+                    <input type="number" formControlName="time_limit_minutes" min="1" />
+                </div>
+            </div>
+
+            <!-- Questions -->
+            <div formArrayName="questions" class="questions-list">
+                @for (q of questionsArray.controls; track $index; let qi = $index) {
+                <div class="q-card" [formGroupName]="qi">
+                    <div class="q-header">
+                        <span class="qnum">Q{{ qi + 1 }}</span>
+                        <textarea formControlName="question_text" rows="2" placeholder="Question text..." class="q-text-input"></textarea>
+                    </div>
+
+                    <div class="options-list" formArrayName="options">
+                        @for (opt of getOptionsArray(qi).controls; track $index; let oi = $index) {
+                        <div class="opt-row" [class.is-correct]="isCorrect(qi, getOptionValue(qi, oi))">
+                            <span class="opt-lbl">{{ ['A','B','C','D'][oi] }}</span>
+                            <input type="text" [formControlName]="oi" placeholder="Option {{ ['A','B','C','D'][oi] }}" class="opt-input" />
+                            <button type="button" class="btn-correct" [class.active]="isCorrect(qi, getOptionValue(qi, oi))"
+                                    (click)="setCorrect(qi, getOptionValue(qi, oi))" title="Mark as correct">
+                                {{ isCorrect(qi, getOptionValue(qi, oi)) ? '✓' : '○' }}
+                            </button>
+                            @if (oi < getOptionsArray(qi).length - 1) {
+                            <button type="button" class="btn-swap" (click)="swapOptions(qi, oi, oi+1)" title="Swap with next">⇅</button>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="q-explanation">
+                        <label>💡 Explanation</label>
+                        <input type="text" formControlName="explanation" placeholder="Why is this the correct answer?" />
+                    </div>
+                </div>
+                }
+            </div>
+        </form>
+        }
     </main>
 </div>
 
-<!-- Confirm Dialog -->
 <app-confirm-dialog
-        [visible]="showDialog()"
-        [title]="dialogTitle()"
-        [message]="dialogMessage()"
-        [confirmLabel]="dialogConfirmLabel()"
-        [type]="dialogType()"
-        (confirmed)="onDialogConfirmed()"
-        (cancelled)="onDialogCancelled()"
+        [visible]="showDialog()" [title]="dialogTitle()" [message]="dialogMessage()"
+        [confirmLabel]="dialogConfirmLabel()" [type]="dialogType()"
+        (confirmed)="onDialogConfirmed()" (cancelled)="onDialogCancelled()"
 />

@@ -108,9 +108,15 @@
           <td><span class="status-badge" [class.published]="course.status === 'PUBLISHED'" [class.draft]="course.status === 'DRAFT'">{{ course.status }}</span></td>
           <td class="muted">{{ course.createdAt | date:'MMM d, y' }}</td>
           <td class="actions">
-            <button class="action-btn" (click)="editCourse(course.id)">✏️ Edit</button>
-            <button class="action-btn" (click)="navigate('/quiz-generator')">📝 Quiz</button>
-            <button class="action-btn danger" (click)="confirmDelete(course)">🗑 Delete</button>
+            <button class="action-btn edit" (click)="editCourse(course.id)">
+              <span class="btn-icon"></span> Edit
+            </button>
+            <button class="action-btn quiz" (click)="navigate('/quiz-generator')">
+              <span class="btn-icon"></span> Quiz
+            </button>
+            <button class="action-btn delete" (click)="confirmDelete(course)">
+              <span class="btn-icon"></span> Delete
+            </button>
           </td>
         </tr>
         }

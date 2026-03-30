@@ -108,10 +108,12 @@
 .spinner-sm { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
 
 // Result screen
-.result-screen { display: flex; flex-direction: column; height: 100%; }
+.result-screen { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+
 .result-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; background: #0d0d0d; color: #fff; flex-shrink: 0;
   h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin: 0; }
 }
+
 .result-body { flex: 1; overflow-y: auto; padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
 .score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid;
   &.high { border-color: #2e7d32; background: #e8f5e9; .score-big { color: #2e7d32; } }
