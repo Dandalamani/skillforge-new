@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { CourseService } from '../../../core/services/course.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Course } from '../../../shared/models/course.model';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { environment } from '../../../../environments/environment';
 
@@ -15,7 +16,7 @@ interface Quiz { id: number; title: string; description: string; status: string;
 @Component({
   selector: 'app-course-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent],
+  imports: [CommonModule, IconComponent, ReactiveFormsModule, ConfirmDialogComponent],
   templateUrl: './course-list.component.html',
   styleUrl: './course-list.component.scss',
 })
@@ -31,7 +32,6 @@ export class CourseListComponent implements OnInit {
   errorMessage = signal('');
   toastMessage = signal('');
 
-  // Quiz panel
   quizPanelCourse = signal<Course | null>(null);
   quizzes = signal<Quiz[]>([]);
   isLoadingQuizzes = signal(false);
@@ -40,15 +40,13 @@ export class CourseListComponent implements OnInit {
   quizSaveMsg = signal('');
   quizSaveErr = signal('');
   isPublishingId = signal<number | null>(null);
-  isDeletingId = signal<number | null>(null);
   editForm!: FormGroup;
   difficulties = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
 
-  // Confirm dialog
   showDialog = signal(false);
   dialogTitle = signal('');
   dialogMessage = signal('');
-  dialogType = signal<'danger'|'warning'|'info'>('danger');
+  dialogType = signal<'danger' | 'warning' | 'info'>('danger');
   dialogConfirmLabel = signal('Confirm');
   pendingAction = signal<(() => void) | null>(null);
 
@@ -62,7 +60,6 @@ export class CourseListComponent implements OnInit {
     });
   }
 
-  // ── Quiz Panel ──────────────────────────────────────────
   openQuizPanel(course: Course): void {
     this.quizPanelCourse.set(course);
     this.editingQuiz.set(null);
@@ -124,7 +121,7 @@ export class CourseListComponent implements OnInit {
         this.isSavingQuiz.set(false);
         setTimeout(() => { this.editingQuiz.set(null); this.quizSaveMsg.set(''); }, 1500);
       },
-      error: err => { this.quizSaveErr.set(err.error?.message || 'Save failed.'); this.isSavingQuiz.set(false); },
+      error: (err: any) => { this.quizSaveErr.set(err.error?.message || 'Save failed.'); this.isSavingQuiz.set(false); },
     });
   }
 
@@ -139,39 +136,18 @@ export class CourseListComponent implements OnInit {
   }
 
   unpublishQuiz(quiz: Quiz): void {
-    this.isPublishingId.set(quiz.id);
     this.http.patch(`${environment.apiUrl}/quizzes/${quiz.id}/unpublish`, {}).subscribe({
       next: () => { this.quizzes.update(l => l.map(q => q.id === quiz.id ? { ...q, status: 'DRAFT' } : q)); this.isPublishingId.set(null); this.showToast('Quiz unpublished.'); },
       error: () => this.isPublishingId.set(null),
     });
   }
 
-deleteQuiz(quiz: Quiz): void {
-  this.openDialog({
-    title: 'Delete Quiz',
-    message: `Are you sure you want to delete "${quiz.title}"? This will also remove all student attempts and cannot be undone.`,
-    type: 'danger',
-    confirmLabel: 'Yes, Delete',
-    action: () => {
-      this.isDeletingId.set(quiz.id);
-      this.http.delete(`${environment.apiUrl}/quizzes/${quiz.id}`).subscribe({
-        next: () => {
-          this.quizzes.update(l => l.filter(q => q.id !== quiz.id));
-          this.isDeletingId.set(null);
-          this.showToast('Quiz deleted.');
-        },
-        error: () => this.isDeletingId.set(null),
-      });
-    },
-  });
-}
-
-  // ── Course actions ──────────────────────────────────────
-  openDialog(opts: { title: string; message: string; type?: 'danger'|'warning'|'info'; confirmLabel?: string; action: () => void }): void {
+  openDialog(opts: { title: string; message: string; type?: 'danger' | 'warning' | 'info'; confirmLabel?: string; action: () => void }): void {
     this.dialogTitle.set(opts.title); this.dialogMessage.set(opts.message);
     this.dialogType.set(opts.type ?? 'danger'); this.dialogConfirmLabel.set(opts.confirmLabel ?? 'Confirm');
     this.pendingAction.set(opts.action); this.showDialog.set(true);
   }
+
   onDialogConfirmed(): void { const a = this.pendingAction(); this.showDialog.set(false); this.pendingAction.set(null); if (a) a(); }
   onDialogCancelled(): void { this.showDialog.set(false); this.pendingAction.set(null); }
   navigate(path: string): void { this.router.navigate([path]); }
@@ -186,7 +162,10 @@ deleteQuiz(quiz: Quiz): void {
       type: pub ? 'warning' : 'info', confirmLabel: pub ? 'Yes, Unpublish' : 'Yes, Publish',
       action: () => {
         const req = pub ? this.courseService.unpublish(course.id) : this.courseService.publish(course.id);
-        req.subscribe({ next: u => { this.courses.update(l => l.map(c => c.id === u.id ? u : c)); this.showToast(`Course ${u.status === 'PUBLISHED' ? 'published' : 'unpublished'}.`); }, error: () => this.showToast('Failed.') });
+        req.subscribe({
+          next: (u: any) => { this.courses.update(l => l.map(c => c.id === u.id ? u : c)); this.showToast(`Course ${u.status === 'PUBLISHED' ? 'published' : 'unpublished'}.`); },
+          error: () => this.showToast('Failed.')
+        });
       },
     });
   }
@@ -194,7 +173,12 @@ deleteQuiz(quiz: Quiz): void {
   confirmDelete(course: Course): void {
     this.openDialog({
       title: 'Delete Course', message: `"${course.title}" will be permanently deleted.`, type: 'danger', confirmLabel: 'Yes, Delete',
-      action: () => { this.courseService.delete(course.id).subscribe({ next: () => { this.courses.update(l => l.filter(c => c.id !== course.id)); this.showToast('Course deleted.'); }, error: () => this.showToast('Failed.') }); },
+      action: () => {
+        this.courseService.delete(course.id).subscribe({
+          next: () => { this.courses.update(l => l.filter(c => c.id !== course.id)); this.showToast('Course deleted.'); },
+          error: () => this.showToast('Failed.')
+        });
+      },
     });
   }
 

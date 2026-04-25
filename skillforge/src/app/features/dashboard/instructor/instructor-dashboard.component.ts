@@ -6,11 +6,12 @@ import { CourseService } from '../../../core/services/course.service';
 import { Course } from '../../../shared/models/course.model';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { InstructorProfileComponent } from '../../instructor/instructor-profile/instructor-profile.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-instructor-dashboard',
   standalone: true,
-  imports: [CommonModule, ConfirmDialogComponent, InstructorProfileComponent],
+  imports: [CommonModule, ConfirmDialogComponent, InstructorProfileComponent, IconComponent],
   templateUrl: './instructor-dashboard.component.html',
   styleUrl: './instructor-dashboard.component.scss',
 })
@@ -30,9 +31,9 @@ export class InstructorDashboardComponent implements OnInit, OnDestroy {
   dialogMessage = signal('');
   pendingDeleteCourse = signal<Course | null>(null);
 
-  totalCourses    = computed(() => this.courses().length);
+  totalCourses     = computed(() => this.courses().length);
   publishedCourses = computed(() => this.courses().filter(c => c.status === 'PUBLISHED').length);
-  draftCourses    = computed(() => this.courses().filter(c => c.status === 'DRAFT').length);
+  draftCourses     = computed(() => this.courses().filter(c => c.status === 'DRAFT').length);
 
   get firstName(): string { return this.user()?.name?.split(' ')[0] ?? ''; }
   get initials(): string {
@@ -46,11 +47,7 @@ export class InstructorDashboardComponent implements OnInit, OnDestroy {
     }
   };
 
-  ngOnInit(): void {
-    this.loadCourses();
-    document.addEventListener('click', this.clickOutside);
-  }
-
+  ngOnInit(): void { this.loadCourses(); document.addEventListener('click', this.clickOutside); }
   ngOnDestroy(): void { document.removeEventListener('click', this.clickOutside); }
 
   loadCourses(): void {
@@ -72,8 +69,7 @@ export class InstructorDashboardComponent implements OnInit, OnDestroy {
   }
 
   onDeleteConfirmed(): void {
-    const course = this.pendingDeleteCourse();
-    if (!course) return;
+    const course = this.pendingDeleteCourse(); if (!course) return;
     this.showDialog.set(false);
     this.courseService.delete(course.id).subscribe({
       next: () => this.courses.update(list => list.filter(c => c.id !== course.id)),

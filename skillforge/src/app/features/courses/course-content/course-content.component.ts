@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormControl, FormArray, F
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpEventType } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { environment } from '../../../../environments/environment';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -26,7 +27,7 @@ interface Quiz {
 @Component({
   selector: 'app-course-content',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent, DatePipe],
+  imports: [CommonModule, IconComponent, ReactiveFormsModule, ConfirmDialogComponent, DatePipe],
   templateUrl: './course-content.component.html',
   styleUrl: './course-content.component.scss',
 })
@@ -43,11 +44,8 @@ export class CourseContentComponent implements OnInit {
   isLoading = signal(true);
   errorMessage = signal('');
   activeTab = signal<'video' | 'pdf' | 'link'>('video');
-
-  // Main panel toggle
   mainPanel = signal<'content' | 'quizzes'>('content');
 
-  // Quiz state
   quizzes = signal<Quiz[]>([]);
   isLoadingQuizzes = signal(false);
   quizzesLoaded = false;
@@ -58,10 +56,8 @@ export class CourseContentComponent implements OnInit {
   isPublishingId = signal<number | null>(null);
   isDeletingId = signal<number | null>(null);
   editForm!: FormGroup;
-
   difficulties = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
 
-  // Upload/link state
   uploadProgress = signal<number | null>(null);
   uploadError = signal('');
   uploadSuccess = signal('');
@@ -78,7 +74,6 @@ export class CourseContentComponent implements OnInit {
   uploadTitle = signal('');
   uploadDesc = signal('');
 
-  // Confirm dialog
   showDialog = signal(false);
   dialogTitle = signal('');
   dialogMessage = signal('');
@@ -108,9 +103,7 @@ export class CourseContentComponent implements OnInit {
 
   showPanel(panel: 'content' | 'quizzes'): void {
     this.mainPanel.set(panel);
-    if (panel === 'quizzes' && !this.quizzesLoaded) {
-      this.loadQuizzes();
-    }
+    if (panel === 'quizzes' && !this.quizzesLoaded) { this.loadQuizzes(); }
   }
 
   loadQuizzes(): void {
@@ -126,7 +119,6 @@ export class CourseContentComponent implements OnInit {
     });
   }
 
-  // ── Quiz Edit ──────────────────────────────────────────
   startEditQuiz(quiz: Quiz): void {
     this.editingQuiz.set(quiz);
     this.quizSaveSuccess.set(''); this.quizSaveError.set('');
@@ -153,7 +145,6 @@ export class CourseContentComponent implements OnInit {
     const a = arr.at(i).value;
     arr.at(i).setValue(arr.at(j).value);
     arr.at(j).setValue(a);
-    // update correct_answer if needed
     const correctCtrl = (this.questionsArray.at(qi) as FormGroup).get('correct_answer')!;
     if (correctCtrl.value === a) correctCtrl.setValue(arr.at(i).value);
     else if (correctCtrl.value === arr.at(i).value) correctCtrl.setValue(a);
@@ -181,7 +172,7 @@ export class CourseContentComponent implements OnInit {
         this.isSavingQuiz.set(false);
         setTimeout(() => { this.editingQuiz.set(null); this.quizSaveSuccess.set(''); }, 1200);
       },
-      error: err => { this.quizSaveError.set(err.error?.message || 'Save failed.'); this.isSavingQuiz.set(false); },
+      error: (err: any) => { this.quizSaveError.set(err.error?.message || 'Save failed.'); this.isSavingQuiz.set(false); },
     });
   }
 
@@ -196,7 +187,6 @@ export class CourseContentComponent implements OnInit {
   }
 
   unpublishQuiz(quiz: Quiz): void {
-    this.isPublishingId.set(quiz.id);
     this.http.patch(`${environment.apiUrl}/quizzes/${quiz.id}/unpublish`, {}).subscribe({
       next: () => { this.quizzes.update(l => l.map(q => q.id === quiz.id ? { ...q, status: 'DRAFT' } : q)); this.isPublishingId.set(null); },
       error: () => this.isPublishingId.set(null),
@@ -212,22 +202,26 @@ export class CourseContentComponent implements OnInit {
     });
   }
 
-  // ── Content upload/link (unchanged) ──
   setTab(tab: 'video' | 'pdf' | 'link'): void {
     this.activeTab.set(tab); this.selectedFile.set(null); this.uploadTitle.set(''); this.uploadDesc.set(''); this.uploadError.set(''); this.uploadSuccess.set('');
   }
+
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0]; if (!file) return;
     this.selectedFile.set(file); if (!this.uploadTitle()) this.uploadTitle.set(file.name.replace(/\.[^/.]+$/, '')); this.uploadError.set('');
   }
+
   onFileDrop(event: DragEvent): void {
-    event.preventDefault(); const file = event.dataTransfer?.files?.[0]; if (!file) return;
-    this.selectedFile.set(file); if (!this.uploadTitle()) this.uploadTitle.set(file.name.replace(/\.[^/.]+$/, '')); this.uploadError.set('');
+    event.preventDefault();
+    const file = event.dataTransfer?.files?.[0]; if (!file) return;
+    this.selectedFile.set(file); if (!this.uploadTitle()) this.uploadTitle.set(file.name.replace(/\.[^/.]+$/, ''));
   }
+
   onDragOver(event: DragEvent): void { event.preventDefault(); }
   clearFile(): void { this.selectedFile.set(null); }
   setUploadTitle(v: string): void { this.uploadTitle.set(v); }
   setUploadDesc(v: string): void { this.uploadDesc.set(v); }
+
   uploadFile(): void {
     const file = this.selectedFile(); if (!file || !this.uploadTitle()) { this.uploadError.set('Please select a file and enter a title.'); return; }
     const fd = new FormData(); fd.append('file', file); fd.append('title', this.uploadTitle()); fd.append('description', this.uploadDesc());
@@ -241,26 +235,30 @@ export class CourseContentComponent implements OnInit {
           this.selectedFile.set(null); this.uploadTitle.set(''); this.uploadDesc.set(''); this.uploadProgress.set(null); this.isUploading.set(false);
         }
       },
-      error: err => { this.uploadError.set(err.error?.message || 'Upload failed.'); this.uploadProgress.set(null); this.isUploading.set(false); },
+      error: (err: any) => { this.uploadError.set(err.error?.message || 'Upload failed.'); this.uploadProgress.set(null); this.isUploading.set(false); },
     });
   }
+
   addLink(): void {
     if (this.linkForm.invalid) { this.linkForm.markAllAsTouched(); return; }
     this.isAddingLink.set(true); this.linkError.set(''); this.linkSuccess.set('');
     this.http.post<{ content: Content }>(`${this.apiBase}/link`, this.linkForm.value).subscribe({
       next: r => { this.contents.update(l => [...l, r.content]); this.linkSuccess.set(`"${r.content.title}" added!`); this.linkForm.reset(); this.isAddingLink.set(false); },
-      error: err => { this.linkError.set(err.error?.message || 'Failed.'); this.isAddingLink.set(false); },
+      error: (err: any) => { this.linkError.set(err.error?.message || 'Failed.'); this.isAddingLink.set(false); },
     });
   }
+
   confirmDelete(c: Content): void { this.pendingDeleteId.set(c.id); this.dialogTitle.set('Delete Content'); this.dialogMessage.set(`"${c.title}" will be permanently removed.`); this.showDialog.set(true); }
+
   onDeleteConfirmed(): void {
     const id = this.pendingDeleteId(); this.showDialog.set(false); if (!id) return;
     this.http.delete(`${this.apiBase}/${id}`).subscribe({ next: () => this.contents.update(l => l.filter(c => c.id !== id)) });
     this.pendingDeleteId.set(null);
   }
-  formatSize(bytes?: number): string { if (!bytes) return ''; return bytes < 1048576 ? `${(bytes/1024).toFixed(1)} KB` : `${(bytes/1048576).toFixed(1)} MB`; }
+
+  formatSize(bytes?: number): string { if (!bytes) return ''; return bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`; }
   byType(type: ContentType): Content[] { return this.contents().filter(c => c.type === type); }
-  getFileUrl(url: string): string { return `http://localhost:3000${url}`; }
+  getFileUrl(url: string): string { return `${environment.apiUrl.replace('/api', '')}${url}`; }
   navigate(path: string): void { this.router.navigate([path]); }
   logout(): void { this.authService.logout(); }
   closeDialog(): void { this.showDialog.set(false); }

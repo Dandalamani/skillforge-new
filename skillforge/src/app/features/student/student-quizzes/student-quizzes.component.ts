@@ -1,8 +1,10 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { environment } from '../../../../environments/environment';
 
 interface StudentQuiz {
@@ -10,16 +12,13 @@ interface StudentQuiz {
   difficulty: string; timeLimit: number; generatedByAi: boolean;
   attempted: boolean; score: number | null; attemptTime: string | null;
 }
-interface Question {
-  id: number; question_text: string; options: string[];
-  correct_answer: string; explanation: string; marks: number;
-}
+interface Question { id: number; question_text: string; options: string[]; correct_answer: string; explanation: string; marks: number; }
 interface QuizDetail { id: number; title: string; questions: Question[]; time_limit_minutes: number; }
 
 @Component({
   selector: 'app-student-quizzes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent, FormsModule],
   templateUrl: './student-quizzes.component.html',
   styleUrl: './student-quizzes.component.scss',
 })
@@ -32,8 +31,6 @@ export class StudentQuizzesComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
   errorMessage = signal('');
   filter = signal<'all' | 'pending' | 'completed'>('all');
-
-  // Quiz taking state
   activeQuiz = signal<QuizDetail | null>(null);
   isLoadingQuiz = signal(false);
   currentQuestion = signal(0);
@@ -43,21 +40,22 @@ export class StudentQuizzesComponent implements OnInit, OnDestroy {
   quizResult = signal<{ score: string; totalMarks: number; gradedAnswers: Record<string, any> } | null>(null);
   private timerInterval: any;
 
+  feedbackRating = signal(0);
+  feedbackComment = signal('');
+  feedbackSubmitted = signal(false);
+  isSubmittingFeedback = signal(false);
+  feedbackError = signal('');
+  currentQuizId = signal<number | null>(null);
+
   get filtered() {
-    const f = this.filter();
-    const all = this.quizzes();
+    const f = this.filter(); const all = this.quizzes();
     if (f === 'pending') return all.filter(q => !q.attempted);
     if (f === 'completed') return all.filter(q => q.attempted);
     return all;
   }
 
-  ngOnInit(): void {
-    this.loadQuizzes();
-  }
-
-  ngOnDestroy(): void {
-    this.clearTimer();
-  }
+  ngOnInit(): void { this.loadQuizzes(); }
+  ngOnDestroy(): void { this.clearTimer(); }
 
   loadQuizzes(): void {
     this.http.get<{ quizzes: StudentQuiz[] }>(`${environment.apiUrl}/student/quizzes`).subscribe({
@@ -71,6 +69,11 @@ export class StudentQuizzesComponent implements OnInit, OnDestroy {
     this.quizResult.set(null);
     this.answers.set({});
     this.currentQuestion.set(0);
+    this.feedbackRating.set(0);
+    this.feedbackComment.set('');
+    this.feedbackSubmitted.set(false);
+    this.feedbackError.set('');
+    this.currentQuizId.set(quizId);
     this.http.get<{ quiz: QuizDetail }>(`${environment.apiUrl}/quizzes/${quizId}`).subscribe({
       next: r => {
         this.activeQuiz.set(r.quiz);
@@ -86,94 +89,79 @@ export class StudentQuizzesComponent implements OnInit, OnDestroy {
     this.clearTimer();
     this.timerInterval = setInterval(() => {
       const t = this.timeLeft() - 1;
-      if (t <= 0) {
-        this.timeLeft.set(0);
-        this.clearTimer();
-        this.submitQuiz();
-      } else {
-        this.timeLeft.set(t);
-      }
+      if (t <= 0) { this.timeLeft.set(0); this.clearTimer(); this.submitQuiz(); }
+      else this.timeLeft.set(t);
     }, 1000);
   }
 
-  clearTimer(): void {
-    if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
-  }
+  clearTimer(): void { if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; } }
 
   get formattedTime(): string {
-    const t = this.timeLeft();
-    const m = Math.floor(t / 60);
-    const s = t % 60;
+    const t = this.timeLeft(); const m = Math.floor(t / 60); const s = t % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
   get isTimeLow(): boolean { return this.timeLeft() <= 60 && this.timeLeft() > 0; }
 
-  selectAnswer(questionId: number, option: string): void {
-    this.answers.update(a => ({ ...a, [questionId]: option }));
-  }
-
-  isSelected(questionId: number, option: string): boolean {
-    return this.answers()[questionId] === option;
-  }
-
-  isAnswered(questionId: number): boolean {
-    return !!this.answers()[questionId];
-  }
-
-  get answeredCount(): number {
-    return Object.keys(this.answers()).length;
-  }
-
+  selectAnswer(questionId: number, option: string): void { this.answers.update(a => ({ ...a, [questionId]: option })); }
+  isSelected(questionId: number, option: string): boolean { return this.answers()[questionId] === option; }
+  isAnswered(questionId: number): boolean { return !!this.answers()[questionId]; }
+  get answeredCount(): number { return Object.keys(this.answers()).length; }
   goToQuestion(index: number): void { this.currentQuestion.set(index); }
   prevQuestion(): void { if (this.currentQuestion() > 0) this.currentQuestion.update(n => n - 1); }
+
   nextQuestion(): void {
     const quiz = this.activeQuiz();
     if (quiz && this.currentQuestion() < quiz.questions.length - 1) this.currentQuestion.update(n => n + 1);
   }
 
   submitQuiz(): void {
-    const quiz = this.activeQuiz();
-    if (!quiz) return;
-    this.clearTimer();
-    this.isSubmitting.set(true);
-
-    // Convert answer keys to strings for backend
+    const quiz = this.activeQuiz(); if (!quiz) return;
+    this.clearTimer(); this.isSubmitting.set(true);
     const answersPayload: Record<string, string> = {};
     const ans = this.answers();
     for (const key of Object.keys(ans)) { answersPayload[key] = ans[Number(key)]; }
-
-    this.http.post<{ result: any }>(`${environment.apiUrl}/quizzes/${quiz.id}/attempt`, {
-      answers: answersPayload,
-    }).subscribe({
-      next: r => {
-        this.quizResult.set(r.result);
-        this.isSubmitting.set(false);
-        this.loadQuizzes(); // refresh list to show updated score
-      },
+    this.http.post<{ result: any }>(`${environment.apiUrl}/quizzes/${quiz.id}/attempt`, { answers: answersPayload }).subscribe({
+      next: r => { this.quizResult.set(r.result); this.isSubmitting.set(false); this.loadQuizzes(); },
       error: () => this.isSubmitting.set(false),
     });
   }
 
+  setRating(r: number): void { this.feedbackRating.set(r); }
+
+  submitFeedback(): void {
+    if (this.feedbackRating() === 0) { this.feedbackError.set('Please select a rating.'); return; }
+    this.isSubmittingFeedback.set(true); this.feedbackError.set('');
+    const quizId = this.currentQuizId();
+    this.http.post(`${environment.apiUrl}/feedback`, {
+      quiz_id: quizId,
+      rating: this.feedbackRating(),
+      comment: this.feedbackComment(),
+    }).subscribe({
+      next: () => { this.feedbackSubmitted.set(true); this.isSubmittingFeedback.set(false); },
+      error: (err: any) => { this.feedbackError.set(err.error?.message || 'Failed to submit feedback.'); this.isSubmittingFeedback.set(false); },
+    });
+  }
+
+  skipFeedback(): void { this.feedbackSubmitted.set(true); }
+
   closeQuiz(): void {
     this.clearTimer();
-    this.activeQuiz.set(null);
-    this.quizResult.set(null);
-    this.answers.set({});
-    this.currentQuestion.set(0);
+    this.activeQuiz.set(null); this.quizResult.set(null);
+    this.answers.set({}); this.currentQuestion.set(0);
+    this.feedbackRating.set(0); this.feedbackComment.set('');
+    this.feedbackSubmitted.set(false); this.feedbackError.set('');
   }
 
   isCorrect(questionId: string): boolean {
-    const result = this.quizResult();
-    return result?.gradedAnswers?.[questionId]?.correct ?? false;
+    return this.quizResult()?.gradedAnswers?.[questionId]?.correct ?? false;
   }
 
   getScoreClass(score: number | null): string {
     if (score === null) return '';
-    if (score >= 80) return 'high';
-    if (score >= 60) return 'mid';
-    return 'low';
+    if (score >= 80) return 'high'; if (score >= 60) return 'mid'; return 'low';
   }
+
   getDifficultyClass(d: string): string { return d?.toLowerCase() ?? ''; }
   navigate(path: string): void { this.router.navigate([path]); }
   logout(): void { this.authService.logout(); }

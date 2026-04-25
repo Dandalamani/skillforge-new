@@ -35,10 +35,10 @@ export class RegisterComponent {
   errorMessage = signal('');
   showPassword = signal(false);
 
-  roles: { value: UserRole; label: string; icon: string }[] = [
-    { value: 'STUDENT', label: 'Student', icon: '🎓' },
-    { value: 'INSTRUCTOR', label: 'Instructor', icon: '📚' },
-    { value: 'ADMIN', label: 'Admin', icon: '⚙️' },
+  roles: { value: UserRole; label: string }[] = [
+    { value: 'STUDENT', label: 'Student' },
+    { value: 'INSTRUCTOR', label: 'Instructor'},
+    { value: 'ADMIN', label: 'Admin' },
   ];
 
   form = this.fb.group(

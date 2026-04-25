@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { environment } from '../../../../environments/environment';
+
+declare var Chart: any;
 
 interface ProgressData {
   totalAttempts: number; avgScore: number | null; passRate: number | null;
@@ -11,12 +14,10 @@ interface ProgressData {
   timeline: { quizTitle: string; course: string; score: number; attemptTime: string; attemptNumber: number }[];
 }
 
-declare var Chart: any;
-
 @Component({
   selector: 'app-student-progress',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './student-progress.component.html',
   styleUrl: './student-progress.component.scss',
 })
@@ -29,10 +30,10 @@ export class StudentProgressComponent implements OnInit, AfterViewInit {
   @ViewChild('lineCanvas')     lineCanvas!:     ElementRef<HTMLCanvasElement>;
   @ViewChild('doughnutCanvas') doughnutCanvas!: ElementRef<HTMLCanvasElement>;
 
-  progress = signal<ProgressData | null>(null);
-  isLoading = signal(true);
+  progress     = signal<ProgressData | null>(null);
+  isLoading    = signal(true);
   errorMessage = signal('');
-  chartsReady = signal(false);
+  chartsReady  = signal(false);
 
   private barChart: any;
   private lineChart: any;
@@ -97,15 +98,7 @@ export class StudentProgressComponent implements OnInit, AfterViewInit {
     );
     this.barChart = new Chart(this.barCanvas.nativeElement, {
       type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Avg Score (%)',
-          data: scores,
-          backgroundColor: colors,
-          borderRadius: 8, borderSkipped: false,
-        }]
-      },
+      data: { labels, datasets: [{ label: 'Avg Score (%)', data: scores, backgroundColor: colors, borderRadius: 8, borderSkipped: false }] },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
@@ -118,7 +111,7 @@ export class StudentProgressComponent implements OnInit, AfterViewInit {
             afterLabel: (ctx: any) => {
               const c = p.byCourse[ctx.dataIndex];
               return c.hasAttempts ? ` Attempts: ${c.attempts}` : '';
-            },
+            }
           }}
         },
         scales: {
@@ -137,16 +130,13 @@ export class StudentProgressComponent implements OnInit, AfterViewInit {
     const scores = sorted.map(t => t.score);
     this.lineChart = new Chart(this.lineCanvas.nativeElement, {
       type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Score (%)', data: scores,
-          borderColor: '#f5c842', backgroundColor: 'rgba(245,200,66,0.1)',
-          pointBackgroundColor: scores.map(s => s >= 80 ? '#2e7d32' : s >= 60 ? '#f5c842' : '#c62828'),
-          pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 6,
-          tension: 0.4, fill: true,
-        }]
-      },
+      data: { labels, datasets: [{
+        label: 'Score (%)', data: scores,
+        borderColor: '#f5c842', backgroundColor: 'rgba(245,200,66,0.1)',
+        pointBackgroundColor: scores.map(s => s >= 80 ? '#2e7d32' : s >= 60 ? '#f5c842' : '#c62828'),
+        pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 6,
+        tension: 0.4, fill: true,
+      }]},
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {

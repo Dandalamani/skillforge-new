@@ -2,11 +2,11 @@
   <aside class="sidebar">
     <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
     <nav class="sidebar-nav">
-      <a class="nav-item active"><span>⚙️</span> Admin Overview</a>
-      <a class="nav-item" (click)="navigate('/admin/users')"><span>👥</span> Users</a>
-      <a class="nav-item" (click)="navigate('/admin/courses')"><span>📘</span> Courses</a>
-      <a class="nav-item" (click)="navigate('/admin/ai-logs')"><span>🤖</span> AI Logs</a>
-      <a class="nav-item" (click)="navigate('/admin/reports')"><span>📊</span> Reports</a>
+      <a class="nav-item active"><app-icon name="settings" [size]="16"></app-icon> Admin Overview</a>
+      <a class="nav-item" (click)="navigate('/admin/users')"><app-icon name="users" [size]="16"></app-icon> Users</a>
+      <a class="nav-item" (click)="navigate('/admin/courses')"><app-icon name="book" [size]="16"></app-icon> Courses</a>
+      <a class="nav-item" (click)="navigate('/admin/ai-logs')"><app-icon name="bot" [size]="16"></app-icon> AI Logs</a>
+      <a class="nav-item" (click)="navigate('/admin/reports')"><app-icon name="bar_chart" [size]="16"></app-icon> Reports</a>
     </nav>
     <button class="logout-btn" (click)="logout()">↩ Sign out</button>
   </aside>
@@ -25,22 +25,22 @@
     @if (!isLoading() && data()) {
     <div class="stats-grid">
       <div class="stat-card" style="--accent:#4a90e2">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon"><app-icon name="users" [size]="28"></app-icon></div>
         <div><div class="stat-value">{{ data()!.totalUsers }}</div><div class="stat-label">Total Users</div><div class="stat-sub">{{ data()!.totalStudents }} students · {{ data()!.totalInstructors }} instructors</div></div>
         <div class="stat-accent-bar"></div>
       </div>
       <div class="stat-card" style="--accent:#27ae60">
-        <div class="stat-icon">📘</div>
+        <div class="stat-icon"><app-icon name="book" [size]="28"></app-icon></div>
         <div><div class="stat-value">{{ data()!.publishedCourses }}</div><div class="stat-label">Active Courses</div><div class="stat-sub">{{ data()!.totalCourses }} total</div></div>
         <div class="stat-accent-bar"></div>
       </div>
       <div class="stat-card" style="--accent:#f5c842">
-        <div class="stat-icon">🤖</div>
+        <div class="stat-icon"><app-icon name="bot" [size]="28"></app-icon></div>
         <div><div class="stat-value">{{ data()!.aiQuizzes }}</div><div class="stat-label">AI Quizzes Generated</div><div class="stat-sub">{{ data()!.totalQuizzes }} total quizzes</div></div>
         <div class="stat-accent-bar"></div>
       </div>
       <div class="stat-card" style="--accent:#2ecc71">
-        <div class="stat-icon">⚡</div>
+        <div class="stat-icon"><app-icon name="trend" [size]="28"></app-icon></div>
         <div><div class="stat-value">{{ data()!.totalAttempts }}</div><div class="stat-label">Quiz Attempts</div><div class="stat-sub">completed attempts</div></div>
         <div class="stat-accent-bar"></div>
       </div>
@@ -65,10 +65,8 @@
           <td><div class="user-cell"><div class="user-avatar">{{ getInitial(u.name) }}</div>{{ u.name }}</div></td>
           <td class="muted">{{ u.email }}</td>
           <td><span class="role-badge" [class]="u.role.toLowerCase()">{{ u.role }}</span></td>
-          <td class="muted">{{ u.createdAt | date: 'MMM d, y' }}</td>
-          <td>
-            <button class="action-btn danger" (click)="confirmDelete(u)">🗑 Remove</button>
-          </td>
+          <td class="muted">{{ u.createdAt | date:'MMM d, y' }}</td>
+          <td><button class="action-btn danger" (click)="confirmDelete(u)"><app-icon name="trash" [size]="13"></app-icon> Remove</button></td>
         </tr>
         }
         </tbody>

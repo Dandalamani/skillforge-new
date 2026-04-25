@@ -7,6 +7,7 @@ export const routes: Routes = [
   { path: 'auth', children: [
     { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
     { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
+    { path: 'feedback', loadComponent: () => import('./features/feedback/feedback.component').then(m => m.FeedbackComponent) },
   ]},
   { path: 'dashboard', canActivate: [authGuard], children: [
     { path: 'student', canActivate: [roleGuard], data: { roles: ['STUDENT'] }, loadComponent: () => import('./features/dashboard/student/student-dashboard.component').then(m => m.StudentDashboardComponent) },

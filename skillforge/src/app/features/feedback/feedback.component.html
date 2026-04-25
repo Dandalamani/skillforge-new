@@ -1,0 +1,104 @@
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
+        <nav class="sidebar-nav">
+            <a class="nav-item" (click)="navigate('/dashboard/instructor')"><app-icon name="home" [size]="16"></app-icon> Overview</a>
+            <a class="nav-item" (click)="navigate('/courses')"><app-icon name="book" [size]="16"></app-icon> My Courses</a>
+            <a class="nav-item" (click)="navigate('/quiz-generator')"><app-icon name="bot" [size]="16"></app-icon> AI Quiz Generator</a>
+            <a class="nav-item" (click)="navigate('/students')"><app-icon name="users" [size]="16"></app-icon> Students</a>
+            <a class="nav-item" (click)="navigate('/analytics')"><app-icon name="bar_chart" [size]="16"></app-icon> Analytics</a>
+            <a class="nav-item active"><app-icon name="message" [size]="16"></app-icon> Feedback</a>
+        </nav>
+        <button class="logout-btn" (click)="logout()">↩ Sign out</button>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <h1>Student Feedback</h1>
+                <p>See what students think about your quizzes</p>
+            </div>
+        </header>
+
+        @if (isLoading()) { <div class="loading-state"><div class="spinner"></div><p>Loading feedback...</p></div> }
+
+        @if (!isLoading()) {
+
+        <!-- Overview cards -->
+        <div class="overview-grid">
+            <div class="ov-card big">
+                <div class="ov-rating-big">{{ avgRating() ?? '—' }}</div>
+                <div class="ov-stars">
+                    @if (avgRating()) {
+                    @for (s of stars(Math.round(avgRating()!)); track s) { <span class="star filled">★</span> }
+                    @for (s of emptyStars(Math.round(avgRating()!)); track s) { <span class="star">★</span> }
+                    }
+                </div>
+                <div class="ov-label">Average Rating</div>
+                <div class="ov-sub">{{ total() }} review{{ total() !== 1 ? 's' : '' }} total</div>
+            </div>
+
+            <div class="ov-card bars">
+                <div class="ov-bars-title">Rating Breakdown</div>
+                @for (n of [5,4,3,2,1]; track n) {
+                <div class="bar-row">
+                    <span class="bar-label">{{ n }}★</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" [style.width.%]="total() > 0 ? (ratingCounts[n] / total()) * 100 : 0" [class]="'r' + n"></div>
+                    </div>
+                    <span class="bar-count">{{ ratingCounts[n] }}</span>
+                </div>
+                }
+            </div>
+
+            <div class="ov-card filter-card">
+                <div class="ov-bars-title">Filter by Rating</div>
+                <div class="rating-filters">
+                    <button class="rf-btn" [class.active]="filterRating() === 'all'" (click)="filterRating.set('all')">All</button>
+                    @for (n of [5,4,3,2,1]; track n) {
+                    <button class="rf-btn" [class.active]="filterRating() === n" (click)="filterRating.set(n)">{{ n }}★</button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (feedbacks().length === 0) {
+        <div class="empty-state">
+            <div class="empty-icon"><app-icon name="message" [size]="48"></app-icon></div>
+            <h3>No feedback yet</h3>
+            <p>Students will leave feedback after completing your quizzes.</p>
+        </div>
+        }
+
+        @if (feedbacks().length > 0) {
+        <div class="feedback-list">
+            @for (f of filtered; track f.id) {
+            <div class="fb-card">
+                <div class="fb-top">
+                    <div class="fb-student">
+                        <div class="fb-avatar">{{ f.student_name[0] }}</div>
+                        <div>
+                            <div class="fb-name">{{ f.student_name }}</div>
+                            <div class="fb-meta">{{ f.quiz_title }} · {{ f.course_title }}</div>
+                        </div>
+                    </div>
+                    <div class="fb-right">
+                        <div class="fb-stars">
+                            @for (s of stars(f.rating); track s) { <span class="star filled">★</span> }
+                            @for (s of emptyStars(f.rating); track s) { <span class="star">★</span> }
+                        </div>
+                        <div class="fb-date">{{ f.createdAt | date:'MMM d, y' }}</div>
+                    </div>
+                </div>
+                @if (f.comment) {
+                <div class="fb-comment">"{{ f.comment }}"</div>
+                } @else {
+                <div class="fb-no-comment">No comment provided.</div>
+                }
+            </div>
+            }
+        </div>
+        }
+        }
+    </main>
+</div>

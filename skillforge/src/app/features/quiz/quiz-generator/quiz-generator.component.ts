@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { CourseService } from '../../../core/services/course.service';
 import { Course } from '../../../shared/models/course.model';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { environment } from '../../../../environments/environment';
 
 interface GeneratedQuestion { question_text: string; options: string[]; correct_answer: string; explanation: string; }
@@ -17,7 +18,7 @@ interface UsageInfo { used: number; limit: number; percent: number; warning: boo
 @Component({
   selector: 'app-quiz-generator',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, IconComponent, ReactiveFormsModule],
   templateUrl: './quiz-generator.component.html',
   styleUrl: './quiz-generator.component.scss',
 })
@@ -41,7 +42,6 @@ export class QuizGeneratorComponent implements OnInit {
   isUnpublishing = signal(false);
   isDeleting = signal(false);
   publishMessage = signal('');
-
   difficulties = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
   questionCounts = [3, 5, 10, 15, 20];
   optionLabels = ['A', 'B', 'C', 'D'];
@@ -55,9 +55,9 @@ export class QuizGeneratorComponent implements OnInit {
 
   manualForm = this.fb.group({
     title: ['', Validators.required],
-    course_id: ['', Validators.required],
     difficulty: ['BEGINNER', Validators.required],
     time_limit_minutes: [30, [Validators.required, Validators.min(1)]],
+    course_id: ['', Validators.required],
     questions: this.fb.array([]),
   });
 
@@ -89,14 +89,14 @@ export class QuizGeneratorComponent implements OnInit {
     (this.questionsArray.at(qi) as FormGroup).get('correct_answer')!.setValue(opt);
   }
 
-  isQTextInvalid(qi: number): boolean {
-    const ctrl = (this.questionsArray.at(qi) as FormGroup).get('question_text')!;
-    return ctrl.invalid && ctrl.touched;
+  isQuestionTextInvalid(qi: number): boolean {
+    const ctrl = (this.questionsArray.at(qi) as FormGroup).get('question_text');
+    return !!(ctrl?.invalid && ctrl?.touched);
   }
 
   isCorrectAnswerInvalid(qi: number): boolean {
-    const ctrl = (this.questionsArray.at(qi) as FormGroup).get('correct_answer')!;
-    return ctrl.invalid && ctrl.touched;
+    const ctrl = (this.questionsArray.at(qi) as FormGroup).get('correct_answer');
+    return !!(ctrl?.invalid && ctrl?.touched);
   }
 
   addQuestion(): void {
@@ -120,7 +120,7 @@ export class QuizGeneratorComponent implements OnInit {
     forkJoin({
       courses: this.courseService.getAll().pipe(catchError(() => of([]))),
       usage: this.http.get<{ usage: UsageInfo }>(`${environment.apiUrl}/quizzes/ai-usage`)
-        .pipe(map(r => r.usage), catchError(() => of(null))),
+        .pipe(map((r: any) => r.usage), catchError(() => of(null))),
     }).subscribe(({ courses, usage }) => {
       this.courses.set(courses);
       this.isLoadingCourses.set(false);
@@ -149,7 +149,6 @@ export class QuizGeneratorComponent implements OnInit {
       }
     }
     this.isCreatingManual.set(true);
-    this.manualError.set(''); this.manualSuccess.set('');
     const val = this.manualForm.value;
     const payload = {
       title: val.title,
@@ -167,7 +166,7 @@ export class QuizGeneratorComponent implements OnInit {
     };
     this.http.post<{ quiz: any }>(`${environment.apiUrl}/quizzes`, payload).subscribe({
       next: r => { this.manualCreatedQuiz.set(r.quiz); this.manualSuccess.set('✓ Quiz created successfully!'); this.isCreatingManual.set(false); },
-      error: err => { this.manualError.set(err.error?.message || 'Failed to create quiz.'); this.isCreatingManual.set(false); },
+      error: (err: any) => { this.manualError.set(err.error?.message || 'Failed to create quiz.'); this.isCreatingManual.set(false); },
     });
   }
 
@@ -175,7 +174,7 @@ export class QuizGeneratorComponent implements OnInit {
     const quiz = this.manualCreatedQuiz(); if (!quiz) return;
     this.isPublishingManual.set(true);
     this.http.patch(`${environment.apiUrl}/quizzes/${quiz.id}/publish`, {}).subscribe({
-      next: () => { this.manualCreatedQuiz.update(q => ({ ...q, status: 'PUBLISHED' })); this.manualSuccess.set('✓ Quiz published! Students can now attempt it.'); this.isPublishingManual.set(false); },
+      next: () => { this.manualCreatedQuiz.update((q: any) => ({ ...q, status: 'PUBLISHED' })); this.manualSuccess.set('✓ Quiz published! Students can now attempt it.'); this.isPublishingManual.set(false); },
       error: () => this.isPublishingManual.set(false),
     });
   }
@@ -183,11 +182,10 @@ export class QuizGeneratorComponent implements OnInit {
   resetManualForm(): void {
     this.manualForm.reset({ difficulty: 'BEGINNER', time_limit_minutes: 30 });
     while (this.questionsArray.length) this.questionsArray.removeAt(0);
-    this.addQuestion();
     this.manualSuccess.set(''); this.manualError.set(''); this.manualCreatedQuiz.set(null);
   }
 
-  get manualQuizPublished(): boolean { return this.manualCreatedQuiz()?.status === 'PUBLISHED'; }
+  get manualQuizIsPublished(): boolean { return this.manualCreatedQuiz()?.status === 'PUBLISHED'; }
   get manualQuizTitle(): string { return this.manualCreatedQuiz()?.title ?? ''; }
   get manualQuizStatus(): string { return this.manualCreatedQuiz()?.status ?? 'DRAFT'; }
 
@@ -203,7 +201,7 @@ export class QuizGeneratorComponent implements OnInit {
     const payload = { topic: this.form.value.topic, course_id: parseInt(this.form.value.course_id as any, 10), num_questions: parseInt(this.form.value.num_questions as any, 10), difficulty: this.form.value.difficulty };
     this.http.post<{ message: string; quiz: GeneratedQuiz; usage: UsageInfo }>(`${environment.apiUrl}/quizzes/generate-ai`, payload).subscribe({
       next: r => { this.generatedQuiz.set(r.quiz); this.successMessage.set(r.message); if (r.usage) { this.usage.set(r.usage); if (r.usage.warning) this.showUsageWarning.set(true); } this.isGenerating.set(false); },
-      error: err => { const b = err.error; this.errorMessage.set(b?.message || 'AI service unavailable.'); if (b?.usage) this.usage.set(b.usage); if (b?.exhausted) this.showUsageWarning.set(true); this.isGenerating.set(false); },
+      error: (err: any) => { const b = err.error; this.errorMessage.set(b?.message || 'AI service unavailable.'); if (b?.usage) this.usage.set(b.usage); if (b?.exhausted) this.showUsageWarning.set(true); this.isGenerating.set(false); },
     });
   }
 
@@ -214,7 +212,7 @@ export class QuizGeneratorComponent implements OnInit {
     this.isPublishing.set(true); this.publishMessage.set('');
     this.http.patch<{ quiz: GeneratedQuiz }>(`${environment.apiUrl}/quizzes/${quiz.id}/publish`, {}).subscribe({
       next: () => { this.generatedQuiz.update(q => q ? { ...q, status: 'PUBLISHED' } : q); this.publishMessage.set('✓ Quiz published!'); this.isPublishing.set(false); },
-      error: () => { this.publishMessage.set('Failed to publish.'); this.isPublishing.set(false); }
+      error: () => { this.publishMessage.set('Failed to publish.'); this.isPublishing.set(false); },
     });
   }
 

@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
-import { environment } from '../../../../environments/environment';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { environment } from '../../../../environments/environment';
 
 interface DashData {
   totalUsers: number; totalStudents: number; totalInstructors: number;
@@ -13,7 +14,13 @@ interface DashData {
   recentUsers: { id: number; name: string; email: string; role: string; createdAt: string }[];
 }
 
-@Component({ selector: 'app-admin-dashboard', standalone: true, imports: [CommonModule, ConfirmDialogComponent], templateUrl: './admin-dashboard.component.html', styleUrl: './admin-dashboard.component.scss' })
+@Component({
+  selector: 'app-admin-dashboard',
+  standalone: true,
+  imports: [CommonModule, ConfirmDialogComponent, IconComponent],
+  templateUrl: './admin-dashboard.component.html',
+  styleUrl: './admin-dashboard.component.scss'
+})
 export class AdminDashboardComponent implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
@@ -21,7 +28,6 @@ export class AdminDashboardComponent implements OnInit {
   user = this.authService.currentUser;
   data = signal<DashData | null>(null);
   isLoading = signal(true);
-
   showDialog = signal(false);
   dialogTitle = signal('');
   dialogMessage = signal('');
@@ -29,7 +35,7 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.http.get<{ dashboard: DashData }>(`${environment.apiUrl}/admin/dashboard`).subscribe({
-      next: (res) => { this.data.set(res.dashboard); this.isLoading.set(false); },
+      next: r => { this.data.set(r.dashboard); this.isLoading.set(false); },
       error: () => this.isLoading.set(false),
     });
   }
@@ -42,9 +48,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   onDeleteConfirmed(): void {
-    const id = this.pendingUserId();
-    this.showDialog.set(false);
-    if (!id) return;
+    const id = this.pendingUserId(); this.showDialog.set(false); if (!id) return;
     this.http.delete(`${environment.apiUrl}/admin/users/${id}`).subscribe({
       next: () => this.data.update(d => d ? { ...d, recentUsers: d.recentUsers.filter(u => u.id !== id), totalUsers: d.totalUsers - 1 } : d),
     });

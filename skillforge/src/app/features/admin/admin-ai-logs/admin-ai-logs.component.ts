@@ -3,11 +3,16 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { environment } from '../../../../environments/environment';
 
 interface AiLog { id: number; quizTitle: string; course: string; difficulty: string; createdAt: string; }
 
-@Component({ selector: 'app-admin-ai-logs', standalone: true, imports: [CommonModule], templateUrl: './admin-ai-logs.component.html', styleUrl: './admin-ai-logs.component.scss' })
+@Component({
+  selector: 'app-admin-ai-logs', standalone: true,
+  imports: [CommonModule, IconComponent],
+  templateUrl: './admin-ai-logs.component.html', styleUrl: './admin-ai-logs.component.scss'
+})
 export class AdminAiLogsComponent implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
@@ -19,7 +24,7 @@ export class AdminAiLogsComponent implements OnInit {
 
   ngOnInit(): void {
     this.http.get<{ logs: AiLog[]; total: number }>(`${environment.apiUrl}/admin/ai-logs`).subscribe({
-      next: (res) => { this.logs.set(res.logs); this.total.set(res.total); this.isLoading.set(false); },
+      next: r => { this.logs.set(r.logs); this.total.set(r.total); this.isLoading.set(false); },
       error: () => { this.errorMessage.set('Failed to load AI logs.'); this.isLoading.set(false); },
     });
   }

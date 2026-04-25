@@ -1,28 +1,25 @@
 import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
-import { CommonModule, UpperCasePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { environment } from '../../../../environments/environment';
 
 interface StudentCourse {
   id: number; title: string; description: string; difficulty: string;
-  instructor: string; quizCount: number; attempted: number;
-  contentCount: number; createdAt: string;
+  instructor: string; quizCount: number; attempted: number; contentCount: number; createdAt: string;
 }
 interface ContentItem {
   id: number; title: string; type: 'VIDEO' | 'PDF' | 'LINK';
   url: string; file_name?: string; file_size?: number; description?: string;
 }
-interface CourseDetail {
-  id: number; title: string; description: string; difficulty_level: string;
-  instructor: { name: string };
-}
+interface CourseDetail { id: number; title: string; description: string; difficulty_level: string; instructor: { name: string }; }
 
 @Component({
   selector: 'app-student-courses',
   standalone: true,
-  imports: [CommonModule, UpperCasePipe],
+  imports: [CommonModule, IconComponent],
   templateUrl: './student-courses.component.html',
   styleUrl: './student-courses.component.scss',
 })
@@ -33,16 +30,11 @@ export class StudentCoursesComponent implements OnInit, OnDestroy {
 
   user = this.authService.currentUser;
   showProfile = signal(false);
-
-  firstName = computed(() => {
-    const name = this.user()?.name;
-    return name ? name.split(' ')[0] : '';
-  });
-
+  firstName = computed(() => { const n = this.user()?.name; return n ? n.split(' ')[0] : ''; });
   memberSince = computed(() => {
-    const user = this.user() as any;
-    if (!user?.createdAt) return 'N/A';
-    return new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const u = this.user() as any;
+    if (!u?.createdAt) return 'N/A';
+    return new Date(u.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   });
 
   courses = signal<StudentCourse[]>([]);
@@ -58,9 +50,7 @@ export class StudentCoursesComponent implements OnInit, OnDestroy {
 
   private clickOutside = (e: MouseEvent) => {
     const t = e.target as HTMLElement;
-    if (!t.closest('.profile-dropdown') && !t.closest('.avatar-circle')) {
-      this.showProfile.set(false);
-    }
+    if (!t.closest('.profile-dropdown') && !t.closest('.avatar-circle')) this.showProfile.set(false);
   };
 
   ngOnInit(): void {
@@ -95,9 +85,7 @@ export class StudentCoursesComponent implements OnInit, OnDestroy {
     this.isLoadingContent.set(true);
     this.activeContent.set(null);
     this.currentIndex.set(0);
-    this.http.get<{ course: CourseDetail; contents: ContentItem[] }>(
-      `${environment.apiUrl}/student/courses/${courseId}/content`
-    ).subscribe({
+    this.http.get<{ course: CourseDetail; contents: ContentItem[] }>(`${environment.apiUrl}/student/courses/${courseId}/content`).subscribe({
       next: r => {
         this.viewingCourse.set(r.course);
         this.contents.set(r.contents);

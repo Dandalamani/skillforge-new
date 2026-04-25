@@ -2,11 +2,11 @@
     <aside class="sidebar">
         <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
         <nav class="sidebar-nav">
-            <a class="nav-item" (click)="navigate('/dashboard/student')"><span>🏠</span> Learning Home</a>
-            <a class="nav-item" (click)="navigate('/student/courses')"><span>📚</span> My Courses</a>
-            <a class="nav-item" (click)="navigate('/student/quizzes')"><span>📝</span> Quizzes</a>
-            <a class="nav-item active"><span>📊</span> Progress</a>
-            <a class="nav-item" (click)="navigate('/student/ai-tutor')"><span>🤖</span> AI Tutor</a>
+            <a class="nav-item" (click)="navigate('/dashboard/student')"><app-icon name="home" [size]="16"></app-icon> Learning Home</a>
+            <a class="nav-item" (click)="navigate('/student/courses')"><app-icon name="book" [size]="16"></app-icon> My Courses</a>
+            <a class="nav-item" (click)="navigate('/student/quizzes')"><app-icon name="clipboard" [size]="16"></app-icon> Quizzes</a>
+            <a class="nav-item active"><app-icon name="bar_chart" [size]="16"></app-icon> Progress</a>
+            <a class="nav-item" (click)="navigate('/student/ai-tutor')"><app-icon name="bot" [size]="16"></app-icon> AI Tutor</a>
         </nav>
         <button class="logout-btn" (click)="logout()">↩ Sign out</button>
     </aside>
@@ -27,28 +27,28 @@
         <!-- KPI Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">📝</div>
+                <div class="stat-icon"><app-icon name="clipboard" [size]="28"></app-icon></div>
                 <div>
                     <div class="stat-value">{{ progress()!.totalAttempts }}</div>
                     <div class="stat-label">Total Attempts</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">🎯</div>
+                <div class="stat-icon"><app-icon name="target" [size]="28"></app-icon></div>
                 <div>
                     <div class="stat-value">{{ progress()!.avgScore !== null ? progress()!.avgScore + '%' : '—' }}</div>
                     <div class="stat-label">Avg. Score</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">✅</div>
+                <div class="stat-icon"><app-icon name="check" [size]="28"></app-icon></div>
                 <div>
                     <div class="stat-value">{{ progress()!.passRate !== null ? progress()!.passRate + '%' : '—' }}</div>
                     <div class="stat-label">Pass Rate</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">📘</div>
+                <div class="stat-icon"><app-icon name="book" [size]="28"></app-icon></div>
                 <div>
                     <div class="stat-value">{{ progress()!.byCourse.length }}</div>
                     <div class="stat-label">Courses Tried</div>
@@ -58,7 +58,7 @@
 
         @if (progress()!.totalAttempts === 0) {
         <div class="empty-state">
-            <div class="empty-icon">📊</div>
+            <div class="empty-icon"><app-icon name="bar_chart" [size]="48"></app-icon></div>
             <p>No quiz attempts yet. Take some quizzes to see your progress charts!</p>
         </div>
         }

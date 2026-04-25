@@ -2,19 +2,17 @@
     <aside class="sidebar">
         <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
         <nav class="sidebar-nav">
-            <a class="nav-item" (click)="navigate('/dashboard/student')"><span>🏠</span> Learning Home</a>
-            <a class="nav-item" (click)="navigate('/student/courses')"><span>📚</span> My Courses</a>
-            <a class="nav-item active"><span>📝</span> Quizzes</a>
-            <a class="nav-item" (click)="navigate('/student/progress')"><span>📊</span> Progress</a>
-            <a class="nav-item" (click)="navigate('/student/ai-tutor')"><span>🤖</span> AI Tutor</a>
+            <a class="nav-item" (click)="navigate('/dashboard/student')"><app-icon name="home" [size]="16"></app-icon> Learning Home</a>
+            <a class="nav-item" (click)="navigate('/student/courses')"><app-icon name="book" [size]="16"></app-icon> My Courses</a>
+            <a class="nav-item active"><app-icon name="clipboard" [size]="16"></app-icon> Quizzes</a>
+            <a class="nav-item" (click)="navigate('/student/progress')"><app-icon name="bar_chart" [size]="16"></app-icon> Progress</a>
+            <a class="nav-item" (click)="navigate('/student/ai-tutor')"><app-icon name="bot" [size]="16"></app-icon> AI Tutor</a>
         </nav>
         <button class="logout-btn" (click)="logout()">↩ Sign out</button>
     </aside>
 
     <main class="main">
-        <header class="topbar">
-            <div><h1>Quizzes</h1><p>All quizzes available to you</p></div>
-        </header>
+        <header class="topbar"><div><h1>Quizzes</h1><p>All quizzes available to you</p></div></header>
 
         <div class="filter-tabs">
             <button class="tab" [class.active]="filter() === 'all'" (click)="filter.set('all')">All</button>
@@ -26,10 +24,7 @@
         @if (errorMessage()) { <div class="alert-error">⚠ {{ errorMessage() }}</div> }
 
         @if (!isLoading() && filtered.length === 0) {
-        <div class="empty-state">
-            <div class="empty-icon">📝</div>
-            <p>{{ filter() === 'completed' ? 'No completed quizzes yet.' : filter() === 'pending' ? '🎉 All quizzes completed!' : 'No quizzes available yet.' }}</p>
-        </div>
+        <div class="empty-state"><div class="empty-icon"><app-icon name="clipboard" [size]="48"></app-icon></div><p>{{ filter() === 'completed' ? 'No completed quizzes yet.' : filter() === 'pending' ? '🎉 All quizzes completed!' : 'No quizzes available yet.' }}</p></div>
         }
 
         @if (!isLoading() && filtered.length > 0) {
@@ -50,11 +45,8 @@
                     <span class="pass-fail">{{ q.score >= 60 ? '✓ Passed' : '✗ Failed' }}</span>
                 </div>
                 }
-                @if (!q.attempted) {
-                <button class="btn-start" (click)="startQuiz(q.id)">Start Quiz →</button>
-                } @else {
-                <button class="btn-retry" (click)="startQuiz(q.id)">Retake →</button>
-                }
+                @if (!q.attempted) { <button class="btn-start" (click)="startQuiz(q.id)">Start Quiz →</button> }
+                @else { <button class="btn-retry" (click)="startQuiz(q.id)">Retake →</button> }
             </div>
             }
         </div>
@@ -73,7 +65,7 @@
 <div class="quiz-overlay">
     <div class="quiz-panel">
 
-        <!-- Result Screen -->
+        <!-- ── RESULT SCREEN ── -->
         @if (quizResult()) {
         <div class="result-screen">
             <div class="result-header">
@@ -86,6 +78,43 @@
                     <div class="score-label">{{ +quizResult()!.score >= 60 ? '✓ Passed' : '✗ Failed' }}</div>
                 </div>
                 <p class="result-sub">{{ activeQuiz()!.title }}</p>
+
+                <!-- ── FEEDBACK SECTION ── -->
+                @if (!feedbackSubmitted()) {
+                <div class="feedback-card">
+                    <div class="feedback-title">💬 How was this quiz?</div>
+                    <p class="feedback-sub">Your feedback helps the instructor improve.</p>
+
+                    <!-- Star Rating -->
+                    <div class="star-row">
+                        @for (star of [1,2,3,4,5]; track star) {
+                        <button type="button" class="star-btn" [class.active]="feedbackRating() >= star" (click)="setRating(star)">★</button>
+                        }
+                        @if (feedbackRating() > 0) {
+                        <span class="rating-label">{{ ['','Poor','Fair','Good','Very Good','Excellent'][feedbackRating()] }}</span>
+                        }
+                    </div>
+
+                    <textarea class="feedback-textarea" [(ngModel)]="feedbackComment" placeholder="Any comments? (optional)" rows="3"></textarea>
+
+                    @if (feedbackError()) { <div class="feedback-error">⚠ {{ feedbackError() }}</div> }
+
+                    <div class="feedback-actions">
+                        <button class="btn-skip" (click)="skipFeedback()">Skip</button>
+                        <button class="btn-submit-feedback" [disabled]="isSubmittingFeedback()" (click)="submitFeedback()">
+                            @if (isSubmittingFeedback()) { <span class="spinner-sm"></span> Submitting... }
+                            @else { Submit Feedback }
+                        </button>
+                    </div>
+                </div>
+                } @else {
+                <div class="feedback-thanks">
+                    <span class="thanks-icon">🎉</span>
+                    @if (feedbackRating() > 0) { <p>Thank you for your feedback!</p> }
+                    @else { <p>Quiz completed!</p> }
+                </div>
+                }
+
                 <div class="result-actions">
                     <button class="btn-close-result" (click)="closeQuiz()">Back to Quizzes</button>
                 </div>
@@ -101,13 +130,9 @@
                         </div>
                         <div class="review-answers">
                             <span class="your-answer">Your answer: <strong>{{ answers()[q.id] || 'Not answered' }}</strong></span>
-                            @if (!isCorrect(q.id.toString())) {
-                            <span class="correct-answer">Correct: <strong>{{ q.correct_answer }}</strong></span>
-                            }
+                            @if (!isCorrect(q.id.toString())) { <span class="correct-answer">Correct: <strong>{{ q.correct_answer }}</strong></span> }
                         </div>
-                        @if (q.explanation) {
-                        <div class="review-explanation">💡 {{ q.explanation }}</div>
-                        }
+                        @if (q.explanation) { <div class="review-explanation">💡 {{ q.explanation }}</div> }
                     </div>
                     }
                 </div>
@@ -115,59 +140,36 @@
         </div>
         }
 
-        <!-- Quiz Taking Screen -->
+        <!-- ── QUIZ TAKING SCREEN ── -->
         @if (!quizResult()) {
-        <!-- Header -->
         <div class="quiz-header">
             <div class="quiz-header-left">
                 <h2 class="quiz-name">{{ activeQuiz()!.title }}</h2>
                 <span class="quiz-progress-text">Question {{ currentQuestion() + 1 }} of {{ activeQuiz()!.questions.length }}</span>
             </div>
             <div class="quiz-header-right">
-                <div class="timer" [class.danger]="isTimeLow">
-                    ⏱ {{ formattedTime }}
-                </div>
+                <div class="timer" [class.danger]="isTimeLow">⏱ {{ formattedTime }}</div>
                 <button class="close-btn" (click)="closeQuiz()">✕</button>
             </div>
         </div>
-
-        <!-- Progress bar -->
-        <div class="quiz-progress-bar">
-            <div class="quiz-progress-fill"
-                 [style.width.%]="((currentQuestion() + 1) / activeQuiz()!.questions.length) * 100"></div>
-        </div>
-
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" [style.width.%]="((currentQuestion() + 1) / activeQuiz()!.questions.length) * 100"></div></div>
         <div class="quiz-body">
-            <!-- Question nav dots -->
             <div class="question-dots">
                 @for (q of activeQuiz()!.questions; track q.id; let i = $index) {
-                <button class="dot"
-                        [class.active]="currentQuestion() === i"
-                        [class.answered]="isAnswered(q.id)"
-                        (click)="goToQuestion(i)">{{ i + 1 }}</button>
+                <button class="dot" [class.active]="currentQuestion() === i" [class.answered]="isAnswered(q.id)" (click)="goToQuestion(i)">{{ i + 1 }}</button>
                 }
             </div>
-
-            <!-- Current question -->
             @let q = activeQuiz()!.questions[currentQuestion()];
             <div class="question-block">
-                <div class="question-text">
-                    <span class="q-num">Q{{ currentQuestion() + 1 }}</span>
-                    {{ q.question_text }}
-                </div>
+                <div class="question-text"><span class="q-num">Q{{ currentQuestion() + 1 }}</span>{{ q.question_text }}</div>
                 <div class="options-list">
                     @for (opt of q.options; track opt) {
-                    <button class="option-btn"
-                            [class.selected]="isSelected(q.id, opt)"
-                            (click)="selectAnswer(q.id, opt)">
-                        <span class="opt-indicator"></span>
-                        {{ opt }}
+                    <button class="option-btn" [class.selected]="isSelected(q.id, opt)" (click)="selectAnswer(q.id, opt)">
+                        <span class="opt-indicator"></span>{{ opt }}
                     </button>
                     }
                 </div>
             </div>
-
-            <!-- Navigation -->
             <div class="quiz-nav">
                 <button class="nav-btn" [disabled]="currentQuestion() === 0" (click)="prevQuestion()">← Previous</button>
                 <div class="answered-count">{{ answeredCount }} / {{ activeQuiz()!.questions.length }} answered</div>
@@ -175,8 +177,7 @@
                 <button class="nav-btn primary" (click)="nextQuestion()">Next →</button>
                 } @else {
                 <button class="nav-btn submit" [disabled]="isSubmitting()" (click)="submitQuiz()">
-                    @if (isSubmitting()) { <span class="spinner-sm"></span> Submitting... }
-                    @else { Submit Quiz ✓ }
+                    @if (isSubmitting()) { <span class="spinner-sm"></span> Submitting... } @else { Submit Quiz ✓ }
                 </button>
                 }
             </div>

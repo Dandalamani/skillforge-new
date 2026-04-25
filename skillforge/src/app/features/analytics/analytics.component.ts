@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { environment } from '../../../environments/environment';
+
+declare var Chart: any;
 
 interface CourseStats {
   courseId: number; title: string; quizCount: number;
@@ -16,12 +19,10 @@ interface AnalyticsData {
   courseStats: CourseStats[];
 }
 
-declare var Chart: any;
-
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss',
 })
@@ -71,7 +72,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
   private renderBar(a: AnalyticsData): void {
     if (!this.barCanvas?.nativeElement) return;
     if (this.barChart) this.barChart.destroy();
-    const labels    = a.courseStats.map(c => c.title.length > 14 ? c.title.substring(0,14)+'…' : c.title);
+    const labels    = a.courseStats.map(c => c.title.length > 14 ? c.title.substring(0, 14) + '…' : c.title);
     const avgScores = a.courseStats.map(c => c.avgScore ?? 0);
     const attempts  = a.courseStats.map(c => c.attempts);
     this.barChart = new Chart(this.barCanvas.nativeElement, {
@@ -87,13 +88,13 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
       ]},
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'top', labels: { font: { family:'DM Sans', size:12 }, usePointStyle:true, padding:16 } },
+        plugins: { legend: { position: 'top', labels: { font: { family: 'DM Sans', size: 12 }, usePointStyle: true, padding: 16 } },
           tooltip: { callbacks: { label: (ctx: any) => ctx.dataset.label === 'Avg Score (%)' ? ` Avg: ${ctx.parsed.y}%` : ` Attempts: ${ctx.parsed.y}` } }
         },
         scales: {
-          y:  { beginAtZero:true, max:100, position:'left',  grid:{color:'#f0ede4'}, ticks:{callback:(v:any)=>v+'%', font:{family:'DM Sans'}} },
-          y2: { beginAtZero:true, position:'right', grid:{display:false}, ticks:{font:{family:'DM Sans'}, stepSize:1} },
-          x:  { grid:{display:false}, ticks:{font:{family:'DM Sans'}} }
+          y:  { beginAtZero: true, max: 100, position: 'left',  grid: { color: '#f0ede4' }, ticks: { callback: (v: any) => v + '%', font: { family: 'DM Sans' } } },
+          y2: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { font: { family: 'DM Sans' }, stepSize: 1 } },
+          x:  { grid: { display: false }, ticks: { font: { family: 'DM Sans' } } }
         }
       }
     });
@@ -102,7 +103,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
   private renderPassRate(a: AnalyticsData): void {
     if (!this.passRateCanvas?.nativeElement) return;
     if (this.passRateChart) this.passRateChart.destroy();
-    const labels    = a.courseStats.map(c => c.title.length > 14 ? c.title.substring(0,14)+'…' : c.title);
+    const labels    = a.courseStats.map(c => c.title.length > 14 ? c.title.substring(0, 14) + '…' : c.title);
     const passRates = a.courseStats.map(c => c.passRate ?? 0);
     this.passRateChart = new Chart(this.passRateCanvas.nativeElement, {
       type: 'bar',
@@ -111,10 +112,10 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
         borderRadius: 8, borderSkipped: false }] },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend:{display:false}, tooltip:{callbacks:{label:(ctx:any)=>` Pass Rate: ${ctx.parsed.y}%`}} },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx: any) => ` Pass Rate: ${ctx.parsed.y}%` } } },
         scales: {
-          x: { grid:{display:false}, ticks:{font:{family:'DM Sans'}} },
-          y: { beginAtZero:true, max:100, grid:{color:'#f0ede4'}, ticks:{callback:(v:any)=>v+'%', font:{family:'DM Sans'}} }
+          x: { grid: { display: false }, ticks: { font: { family: 'DM Sans' } } },
+          y: { beginAtZero: true, max: 100, grid: { color: '#f0ede4' }, ticks: { callback: (v: any) => v + '%', font: { family: 'DM Sans' } } }
         }
       }
     });
@@ -128,20 +129,22 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
       data: {
         labels: ['Published', 'Drafts'],
         datasets: [{ data: [a.publishedCourses, a.totalCourses - a.publishedCourses],
-          backgroundColor: ['rgba(46,125,50,0.85)', 'rgba(245,200,66,0.85)'], borderWidth:0, hoverOffset:6 }]
+          backgroundColor: ['rgba(46,125,50,0.85)', 'rgba(245,200,66,0.85)'], borderWidth: 0, hoverOffset: 6 }]
       },
-      options: { responsive:true, maintainAspectRatio:false, cutout:'70%',
-        plugins: { legend:{ position:'bottom', labels:{font:{family:'DM Sans',size:12}, padding:16, usePointStyle:true} },
-          tooltip:{callbacks:{label:(ctx:any)=>` ${ctx.label}: ${ctx.parsed}`}} }
+      options: { responsive: true, maintainAspectRatio: false, cutout: '70%',
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 12 }, padding: 16, usePointStyle: true } },
+          tooltip: { callbacks: { label: (ctx: any) => ` ${ctx.label}: ${ctx.parsed}` } } }
       }
     });
   }
 
   getPassRateHeight(): number { return Math.max(180, (this.analytics()?.courseStats.length ?? 1) * 60); }
+
   getScoreClass(score: number | null): string {
     if (score === null) return 'none';
     if (score >= 80) return 'high'; if (score >= 60) return 'mid'; return 'low';
   }
+
   navigate(path: string): void { this.router.navigate([path]); }
   logout(): void { this.authService.logout(); }
 }

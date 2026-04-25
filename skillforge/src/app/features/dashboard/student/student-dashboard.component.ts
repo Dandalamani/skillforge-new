@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { StudentProfileComponent } from '../../student/student-profile/student-profile.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { environment } from '../../../../environments/environment';
 
 interface DashboardData {
@@ -15,7 +16,7 @@ interface DashboardData {
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [CommonModule, StudentProfileComponent],
+  imports: [CommonModule, StudentProfileComponent, IconComponent],
   templateUrl: './student-dashboard.component.html',
   styleUrl: './student-dashboard.component.scss',
 })
@@ -30,13 +31,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   showProfile = signal(false);
   showProfileDrawer = signal(false);
 
-  firstName = computed(() => this.user()?.name?.split(' ')[0] ?? '');
-  greeting = computed(() => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
-    return 'Good evening';
-  });
+  firstName  = computed(() => this.user()?.name?.split(' ')[0] ?? '');
+  greeting   = computed(() => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; });
   memberSince = computed(() => {
     const u = this.user() as any;
     if (!u?.createdAt) return 'N/A';
@@ -45,9 +41,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   private clickOutside = (e: MouseEvent) => {
     const t = e.target as HTMLElement;
-    if (!t.closest('.profile-dropdown') && !t.closest('.avatar-circle')) {
-      this.showProfile.set(false);
-    }
+    if (!t.closest('.profile-dropdown') && !t.closest('.avatar-circle')) this.showProfile.set(false);
   };
 
   ngOnInit(): void {
@@ -61,12 +55,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void { document.removeEventListener('click', this.clickOutside); }
 
   toggleProfile(): void { this.showProfile.update(v => !v); }
-
-  openProfileDrawer(): void {
-    this.showProfile.set(false);
-    this.showProfileDrawer.set(true);
-  }
-
+  openProfileDrawer(): void { this.showProfile.set(false); this.showProfileDrawer.set(true); }
   getDifficultyClass(d: string): string { return d?.toLowerCase() ?? ''; }
   navigate(path: string): void { this.showProfile.set(false); this.router.navigate([path]); }
   logout(): void { this.authService.logout(); }

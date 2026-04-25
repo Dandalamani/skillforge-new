@@ -2,11 +2,11 @@
     <aside class="sidebar">
         <div class="sidebar-brand"><div class="logo-mark">SF</div><span>SkillForge</span></div>
         <nav class="sidebar-nav">
-            <a class="nav-item" (click)="navigate('/dashboard/instructor')"><span>🏠</span> Overview</a>
-            <a class="nav-item active" (click)="navigate('/courses')"><span>📘</span> My Courses</a>
-            <a class="nav-item" (click)="navigate('/quiz-generator')"><span>🤖</span> AI Quiz Generator</a>
-            <a class="nav-item" (click)="navigate('/students')"><span>👥</span> Students</a>
-            <a class="nav-item" (click)="navigate('/analytics')"><span>📊</span> Analytics</a>
+            <a class="nav-item" (click)="navigate('/dashboard/instructor')"><app-icon name="home" [size]="16"></app-icon> Overview</a>
+            <a class="nav-item active" (click)="navigate('/courses')"><app-icon name="book" [size]="16"></app-icon> My Courses</a>
+            <a class="nav-item" (click)="navigate('/quiz-generator')"><app-icon name="bot" [size]="16"></app-icon> AI Quiz Generator</a>
+            <a class="nav-item" (click)="navigate('/students')"><app-icon name="users" [size]="16"></app-icon> Students</a>
+            <a class="nav-item" (click)="navigate('/analytics')"><app-icon name="bar_chart" [size]="16"></app-icon> Analytics</a>
         </nav>
         <button class="logout-btn" (click)="logout()">↩ Sign out</button>
     </aside>
@@ -21,13 +21,13 @@
                 </div>
             </div>
             <div class="header-center">
-                <button class="panel-toggle" [class.active]="mainPanel() === 'content'" (click)="showPanel('content')">📂 Content</button>
-                <button class="panel-toggle" [class.active]="mainPanel() === 'quizzes'" (click)="showPanel('quizzes')">📝 My Quizzes</button>
+                <button class="panel-toggle" [class.active]="mainPanel() === 'content'" (click)="showPanel('content')"><app-icon name="folder" [size]="14"></app-icon> Content</button>
+                <button class="panel-toggle" [class.active]="mainPanel() === 'quizzes'" (click)="showPanel('quizzes')"><app-icon name="clipboard" [size]="14"></app-icon> My Quizzes</button>
             </div>
             <div class="content-stats">
-                <span class="stat-chip video">🎬 {{ byType('VIDEO').length }} Videos</span>
-                <span class="stat-chip pdf">📄 {{ byType('PDF').length }} PDFs</span>
-                <span class="stat-chip link">🔗 {{ byType('LINK').length }} Links</span>
+                <span class="stat-chip video"><app-icon name="play" [size]="12"></app-icon> {{ byType('VIDEO').length }} Videos</span>
+                <span class="stat-chip pdf"><app-icon name="file_text" [size]="12"></app-icon> {{ byType('PDF').length }} PDFs</span>
+                <span class="stat-chip link"><app-icon name="link" [size]="12"></app-icon> {{ byType('LINK').length }} Links</span>
             </div>
         </header>
 
@@ -36,9 +36,9 @@
         <div class="content-layout">
             <section class="add-panel">
                 <div class="tab-bar">
-                    <button class="tab-btn" [class.active]="activeTab() === 'video'" (click)="setTab('video')">🎬 Video</button>
-                    <button class="tab-btn" [class.active]="activeTab() === 'pdf'" (click)="setTab('pdf')">📄 PDF</button>
-                    <button class="tab-btn" [class.active]="activeTab() === 'link'" (click)="setTab('link')">🔗 Link</button>
+                    <button class="tab-btn" [class.active]="activeTab() === 'video'" (click)="setTab('video')"><app-icon name="play" [size]="14"></app-icon> Video</button>
+                    <button class="tab-btn" [class.active]="activeTab() === 'pdf'" (click)="setTab('pdf')"><app-icon name="file_text" [size]="14"></app-icon> PDF</button>
+                    <button class="tab-btn" [class.active]="activeTab() === 'link'" (click)="setTab('link')"><app-icon name="link" [size]="14"></app-icon> Link</button>
                 </div>
 
                 @if (activeTab() === 'video') {
@@ -104,21 +104,21 @@
                 @if (!isLoading() && contents().length === 0) { <div class="empty-state"><span>📂</span><p>No content yet. Upload a video, PDF, or add a link to get started.</p></div> }
                 @if (!isLoading() && contents().length > 0) {
                 @if (byType('VIDEO').length > 0) {
-                <div class="content-group"><div class="group-label">🎬 Videos</div>
+                <div class="content-group"><div class="group-label"><app-icon name="play" [size]="14"></app-icon> Videos</div>
                     @for (c of byType('VIDEO'); track c.id) {
                     <div class="content-item"><div class="ci-icon video">🎬</div><div class="ci-info"><p class="ci-title">{{ c.title }}</p><p class="ci-meta">@if (c.file_name) { {{ c.file_name }} · }@if (c.file_size) { {{ formatSize(c.file_size) }} · }{{ c.createdAt | date:'MMM d, y' }}</p>@if (c.description) { <p class="ci-desc">{{ c.description }}</p> }</div><div class="ci-actions"><a [href]="getFileUrl(c.url)" target="_blank" class="btn-view">▶ View</a><button class="btn-del" (click)="confirmDelete(c)">🗑</button></div></div>
                     }
                 </div>
                 }
                 @if (byType('PDF').length > 0) {
-                <div class="content-group"><div class="group-label">📄 PDFs</div>
+                <div class="content-group"><div class="group-label"><app-icon name="file_text" [size]="14"></app-icon> PDFs</div>
                     @for (c of byType('PDF'); track c.id) {
                     <div class="content-item"><div class="ci-icon pdf">📄</div><div class="ci-info"><p class="ci-title">{{ c.title }}</p><p class="ci-meta">@if (c.file_name) { {{ c.file_name }} · }@if (c.file_size) { {{ formatSize(c.file_size) }} · }{{ c.createdAt | date:'MMM d, y' }}</p>@if (c.description) { <p class="ci-desc">{{ c.description }}</p> }</div><div class="ci-actions"><a [href]="getFileUrl(c.url)" target="_blank" class="btn-view pdf">📖 Open</a><button class="btn-del" (click)="confirmDelete(c)">🗑</button></div></div>
                     }
                 </div>
                 }
                 @if (byType('LINK').length > 0) {
-                <div class="content-group"><div class="group-label">🔗 Links</div>
+                <div class="content-group"><div class="group-label"><app-icon name="link" [size]="14"></app-icon> Links</div>
                     @for (c of byType('LINK'); track c.id) {
                     <div class="content-item"><div class="ci-icon link">🔗</div><div class="ci-info"><p class="ci-title">{{ c.title }}</p><p class="ci-meta ci-url">{{ c.url }}</p>@if (c.description) { <p class="ci-desc">{{ c.description }}</p> }</div><div class="ci-actions"><a [href]="c.url" target="_blank" class="btn-view link">🔗 Open</a><button class="btn-del" (click)="confirmDelete(c)">🗑</button></div></div>
                     }
@@ -139,10 +139,10 @@
 
             @if (!isLoadingQuizzes() && quizzes().length === 0) {
             <div class="quiz-empty">
-                <div class="qe-icon">📝</div>
+                <div class="qe-icon"><app-icon name="clipboard" [size]="48"></app-icon></div>
                 <h3>No Quizzes Generated</h3>
                 <p>No quizzes have been generated for this course yet.</p>
-                <button class="btn-goto-gen" (click)="navigate('/quiz-generator')">🤖 Generate Quiz with AI</button>
+                <button class="btn-goto-gen" (click)="navigate('/quiz-generator')"><app-icon name="bot" [size]="14"></app-icon> Generate Quiz with AI</button>
             </div>
             }
 
@@ -150,7 +150,7 @@
             <div class="quiz-list">
                 <div class="quiz-list-head">
                     <h3>Quizzes <span class="count-badge">{{ quizzes().length }}</span></h3>
-                    <button class="btn-goto-gen" (click)="navigate('/quiz-generator')">🤖 Generate More</button>
+                    <button class="btn-goto-gen" (click)="navigate('/quiz-generator')"><app-icon name="bot" [size]="14"></app-icon> Generate More</button>
                 </div>
                 @for (quiz of quizzes(); track quiz.id) {
                 <div class="quiz-card">
@@ -160,25 +160,28 @@
                             <div class="qc-meta">
                                 <span class="diff-chip" [class]="quiz.difficulty_level.toLowerCase()">{{ quiz.difficulty_level }}</span>
                                 <span class="qc-time">⏱ {{ quiz.time_limit_minutes }} min</span>
-                                <span class="qc-questions">{{ quiz.questions.length}} questions</span>
-                                @if (quiz.generated_by_ai) { <span class="ai-chip">AI</span> }
+                                <span class="qc-questions">{{ quiz.questions.length }} questions</span>
+                                @if (quiz.generated_by_ai) { <span class="ai-chip">🤖 AI</span> }
                             </div>
                         </div>
                         <span class="status-chip" [class.published]="quiz.status === 'PUBLISHED'" [class.draft]="quiz.status !== 'PUBLISHED'">
-                    {{ quiz.status === 'PUBLISHED' ? '🟢 Published' : '⚪ Draft' }}
-                  </span>
+                            {{ quiz.status === 'PUBLISHED' ? '🟢 Published' : '⚪ Draft' }}
+                        </span>
                     </div>
                     <div class="qc-actions">
-                        <button class="qbtn edit" (click)="startEditQuiz(quiz)">✏ Edit</button>
+                        <button class="qbtn edit" (click)="startEditQuiz(quiz)"><app-icon name="edit" [size]="14"></app-icon> Edit</button>
                         @if (quiz.status !== 'PUBLISHED') {
                         <button class="qbtn publish" [disabled]="isPublishingId() === quiz.id" (click)="publishQuiz(quiz)">
-                            @if (isPublishingId() === quiz.id) { <span class="spin-sm"></span> } @else { 🚀 Publish }
+                            @if (isPublishingId() === quiz.id) { <span class="spin-sm"></span> } @else { <app-icon name="upload" [size]="14"></app-icon> Publish }
                         </button>
                         } @else {
                         <button class="qbtn unpublish" [disabled]="isPublishingId() === quiz.id" (click)="unpublishQuiz(quiz)">
-                            @if (isPublishingId() === quiz.id) { <span class="spin-sm"></span> } @else { ↩ Unpublish }
+                            @if (isPublishingId() === quiz.id) { <span class="spin-sm"></span> } @else { <app-icon name="logout" [size]="14"></app-icon> Unpublish }
                         </button>
                         }
+                        <button class="qbtn delete" [disabled]="isDeletingId() === quiz.id" (click)="deleteQuiz(quiz)">
+                            @if (isDeletingId() === quiz.id) { <span class="spin-sm"></span> } @else { <app-icon name="trash" [size]="14"></app-icon> Delete }
+                        </button>
                     </div>
                 </div>
                 }
@@ -197,8 +200,6 @@
                 @if (quizSaveError())   { <div class="alert-error">⚠ {{ quizSaveError() }}</div> }
 
                 <form [formGroup]="editForm" (ngSubmit)="saveQuiz()" class="qedit-form">
-
-                    <!-- Quiz meta -->
                     <div class="qedit-meta-row">
                         <div class="field">
                             <label>Quiz Title *</label>
@@ -216,7 +217,6 @@
                         </div>
                     </div>
 
-                    <!-- Questions -->
                     <div class="questions-edit-list" formArrayName="questions">
                         @for (q of questionsArray.controls; track $index; let qi = $index) {
                         <div class="qedit-question" [formGroupName]="qi">
